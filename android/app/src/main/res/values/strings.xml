@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">موسوعة الأعشاب الطبية</string>
-    <string name="exit_confirm">اضغط رجوع مرة أخرى للخروج</string>
-    <string name="no_internet_title">لا يوجد اتصال بالإنترنت</string>
-    <string name="retry">إعادة المحاولة</string>
-</resources>
