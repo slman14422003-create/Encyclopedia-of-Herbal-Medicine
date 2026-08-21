@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>مساعدة الزوار - موسوعة الأعشاب الطبية</title>
+    <meta name="theme-color" content="#2e7d32">
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #60ad5e;
+            --primary-dark: #1b5e20;
+            --danger: #c62828;
+            --light-bg: #fef9e6;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --separator: #e0d6b5;
+            --text: #3e2723;
+            --text-secondary: #6d4c41;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --radius: 24px;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+        }
+        
+        body.dark-mode {
+            --primary: #81c784;
+            --light-bg: #1a1a2e;
+            --card-bg: rgba(30, 30, 46, 0.95);
+            --separator: #2d2d44;
+            --text: #f5f0e0;
+            --text-secondary: #b8b8d0;
+            --glass-bg: rgba(30, 30, 46, 0.85);
+        }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--light-bg);
+            color: var(--text);
+            transition: 0.2s;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-icon i {
+            font-size: 1.8rem;
+            color: #faf3e0;
+        }
+        
+        .logo-text h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        
+        .logo-text p {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+        
+        .mode-switch {
+            position: relative;
+            width: 80px;
+            height: 40px;
+            background: linear-gradient(145deg, #cfc6a8, #b8ae8e);
+            border-radius: 60px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            border: none;
+        }
+        
+        .mode-switch i { font-size: 1rem; z-index: 2; }
+        .mode-switch i.fa-sun { color: #ffb300; }
+        .mode-switch i.fa-moon { color: #c0d0ff; }
+        
+        .mode-switch .slider-track {
+            position: absolute;
+            width: 34px;
+            height: 34px;
+            background: radial-gradient(circle, #ffefb0, #ffb845);
+            border-radius: 50%;
+            top: 3px;
+            left: 4px;
+            transition: transform 0.3s;
+            z-index: 1;
+        }
+        
+        body.dark-mode .mode-switch .slider-track {
+            transform: translateX(36px);
+        }
+        
+        .welcome-message {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .welcome-message h2 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .welcome-message p {
+            opacity: 0.9;
+        }
+        
+        .help-section {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--separator);
+            box-shadow: var(--shadow);
+        }
+        
+        .help-section h2 {
+            color: var(--primary);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .help-card {
+            background: var(--light-bg);
+            border-radius: 16px;
+            padding: 1rem;
+            border-right: 3px solid var(--primary);
+            transition: transform 0.2s;
+        }
+        
+        .help-card:hover {
+            transform: translateX(-3px);
+        }
+        
+        .help-card h3 {
+            color: var(--primary);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .help-card p {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+        
+        .faq-item {
+            background: var(--light-bg);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .faq-item:hover {
+            transform: translateX(-3px);
+            background: var(--primary-container);
+        }
+        
+        .faq-question {
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .faq-item.open .faq-answer {
+            max-height: 200px;
+            margin-top: 10px;
+        }
+        
+        .contact-card {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border-radius: var(--radius);
+            padding: 1.2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .contact-card i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-card h3 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-card button {
+            background: white;
+            color: #128C7E;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 50px;
+            margin-top: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .btn-back {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
+        
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--separator);
+        }
+        
+        .developer {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .help-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- الهيدر -->
+    <div class="header">
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fas fa-leaf"></i></div>
+            <div class="logo-text">
+                <h1>موسوعة الأعشاب الطبية</h1>
+                <p>دليل المساعدة للزوار</p>
+            </div>
+        </div>
+        <div class="mode-switch" id="themeToggle">
+            <div class="slider-track"></div>
+            <i class="fas fa-sun"></i>
+            <i class="fas fa-moon"></i>
+        </div>
+    </div>
+
+    <!-- رسالة ترحيب -->
+    <div class="welcome-message">
+        <h2>🌿 مرحباً بك في موسوعة الأعشاب الطبية</h2>
+        <p>هذا الدليل يساعدك في استخدام جميع ميزات التطبيق بسهولة</p>
+    </div>
+
+    <!-- دليل الاستخدام السريع -->
+    <div class="help-section">
+        <h2><i class="fas fa-compass"></i> دليل الاستخدام السريع</h2>
+        <div class="help-grid">
+            <div class="help-card">
+                <h3><i class="fas fa-search"></i> البحث عن عشبة</h3>
+                <p>اضغط على زر "بحث" الموجود في شريط الأدوات، ثم اكتب اسم العشبة التي تبحث عنها.</p>
+            </div>
+            <div class="help-card">
+                <h3><i class="fas fa-folder-tree"></i> التصنيفات</h3>
+                <p>اضغط على "التصنيفات" لعرض الأعشاب مصنفة حسب الفوائد والاستخدامات.</p>
+            </div>
+            <div class="help-card">
+                <h3><i class="fas fa-balance-scale"></i> مقارنة الأعشاب</h3>
+                <p>قارن بين عشبتين أو أكثر من حيث الفوائد والتحذيرات والأضرار لاختيار الأنسب لك.</p>
+            </div>
+            <div class="help-card">
+                <h3><i class="fas fa-bookmark"></i> الإشارات المرجعية</h3>
+                <p>أضف الأعشاب المفضلة لديك إلى الإشارات المرجعية للوصول إليها بسرعة لاحقاً.</p>
+            </div>
+            <div class="help-card">
+                <h3><i class="fas fa-print"></i> طباعة المعلومات</h3>
+                <p>يمكنك طباعة معلومات أي عشبة للاحتفاظ بها أو مشاركتها مع الآخرين.</p>
+            </div>
+            <div class="help-card">
+                <h3><i class="fas fa-chart-line"></i> إحصائيات الزوار</h3>
+                <p>تابع إحصائيات استخدامك للتطبيق مثل عدد زياراتك والأعشاب المفضلة لديك.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- الأسئلة الشائعة -->
+    <div class="help-section">
+        <h2><i class="fas fa-question-circle"></i> الأسئلة الشائعة</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span><i class="fas fa-cloud-download-alt"></i> هل يمكن استخدام التطبيق بدون إنترنت؟</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    نعم! بمجرد تحميل البيانات لأول مرة، يمكنك استخدام التطبيق في وضع عدم الاتصال. سيتم عرض البيانات المخزنة محلياً على جهازك.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span><i class="fas fa-moon"></i> كيف يمكن تغيير مظهر التطبيق؟</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    اضغط على زر الوضع الليلي 🌙/☀️ في أعلى الشاشة للتبديل بين المظهر النهاري والليلي.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span><i class="fas fa-text-height"></i> كيف يمكن تغيير حجم الخط؟</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    اضغط على زر "Aa" في شريط الأدوات لتغيير حجم الخط بين (عادي، كبير، أكبر) حسب راحتك في القراءة.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span><i class="fas fa-download"></i> كيف أثبت التطبيق على جهازي؟</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    في متصفح Chrome: اضغط على القائمة (⋮) ثم اختر "تثبيت التطبيق".<br>
+                    في Safari: اضغط على مشاركة ثم "إضافة إلى الشاشة الرئيسية".
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span><i class="fas fa-sync-alt"></i> كيف يتم تحديث بيانات الأعشاب؟</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    يتم تحديث البيانات تلقائياً عند وجود اتصال بالإنترنت. يمكنك أيضاً الضغط على زر "تحديث" في شريط الأدوات للحصول على أحدث البيانات.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span><i class="fas fa-shield-alt"></i> هل بياناتي آمنة؟</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    نعم تماماً. التطبيق لا يجمع أي معلومات شخصية عنك. جميع البيانات التي تحفظها (إشارات مرجعية، مقارنات) تخزن فقط على جهازك.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نصائح سريعة -->
+    <div class="help-section">
+        <h2><i class="fas fa-lightbulb"></i> نصائح سريعة</h2>
+        <div class="help-grid">
+            <div class="help-card">
+                <h3><i class="fas fa-search-plus"></i> البحث المتقدم</h3>
+                <p>استخدم زر "بحث متقدم" للبحث في الفوائد أو التحذيرات وليس فقط الأسماء.</p>
+            </div>
+            <div class="help-card">
+                <h3><i class="fas fa-chart-line"></i> تتبع زياراتك</h3>
+                <p>اضغط على "إحصائيات الزوار" لمعرفة عدد زياراتك للتطبيق وإحصائياتك الشخصية.</p>
+            </div>
+            <div class="help-card">
+                <h3><i class="fas fa-share-alt"></i> مشاركة التطبيق</h3>
+                <p>اضغط على "مشاركة التطبيق" لإرسال رابط الموسوعة لأصدقائك وعائلتك.</p>
+            </div>
+            <div class="help-card">
+                <h3><i class="fas fa-database"></i> حذف المؤقتة</h3>
+                <p>إذا واجهت أي مشكلة، استخدم زر "حذف المؤقتة" لمسح الكاش وإعادة تحميل التطبيق.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- التواصل -->
+    <div class="contact-card">
+        <i class="fab fa-whatsapp"></i>
+        <h3>تواصل مع المطور</h3>
+        <p>للاستفسارات أو الاقتراحات، يمكنك التواصل عبر واتساب</p>
+        <button onclick="window.open('https://wa.me/9630932934273', '_blank')">
+            <i class="fab fa-whatsapp"></i> 0932934273
+        </button>
+    </div>
+
+    <!-- زر العودة -->
+    <div style="text-align: center;">
+        <button class="btn-back" onclick="window.location.href='./'">
+            <i class="fas fa-home"></i> العودة إلى الموسوعة
+        </button>
+    </div>
+
+    <!-- تذييل -->
+    <div class="footer">
+        <p>موسوعة الأعشاب الطبية - نسخة الزوار</p>
+        <div class="developer">
+            <i class="fas fa-code"></i> تطوير: المعالج الفيزيائي سلمان
+        </div>
+        <p>جميع الحقوق محفوظة © 2026</p>
+    </div>
+</div>
+
+<script>
+    // تبديل الوضع الليلي/النهاري
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+    
+    // تهيئة المظهر
+    function initTheme() {
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    }
+    
+    // تهيئة الأسئلة الشائعة
+    function initFAQ() {
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            question.addEventListener('click', () => {
+                item.classList.toggle('open');
+                const icon = question.querySelector('.fa-chevron-down');
+                if (icon) {
+                    icon.style.transform = item.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0)';
+                }
+            });
+        });
+    }
+    
+    // ربط الأحداث
+    document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+    
+    // تسجيل Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').catch(e => console.log('SW registration failed:', e));
+        });
+    }
+    
+    // التهيئة
+    initTheme();
+    initFAQ();
+    
+    console.log('📱 صفحة المساعدة للزوار تم تحميلها');
+</script>
+</body>
+</html>
