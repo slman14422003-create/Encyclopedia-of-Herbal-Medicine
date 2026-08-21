@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
             boolean nightMode = (getResources().getConfiguration().uiMode
                     & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
                     == android.content.res.Configuration.UI_MODE_NIGHT_YES;
-            WebSettingsCompat.setAlgorithmicDarkening(settings, nightMode);
+            WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, nightMode);
         }
 
         webView.setWebViewClient(new AppWebViewClient());
@@ -267,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onReceivedError(@NonNull WebView view, @NonNull android.webkit.WebResourceRequest request, @NonNull android.webkit.WebResourceError error) {
+        public void onReceivedError(@NonNull WebView view, @NonNull android.webkit.WebResourceRequest request, @NonNull androidx.webkit.WebResourceErrorCompat error) {
             super.onReceivedError(view, request, error);
             if (request.isForMainFrame()) {
                 Log.w(TAG, "Main frame load error: " + error.getDescription());
