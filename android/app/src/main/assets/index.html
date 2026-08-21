@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>موسوعة الأعشاب الطبية | تطبيق متقدم</title>
+    
+    <!-- تحسينات PWA والتطبيق -->
+    <meta name="theme-color" content="#2e7d32">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="أعشاب طبية">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="موسوعة الأعشاب">
+    <meta name="description" content="موسوعة شاملة للأعشاب الطبية - تطبيق متقدم مع مزامنة سحابية فورية">
+    <meta name="keywords" content="أعشاب طبية, فوائد الأعشاب, علاج بالأعشاب, موسوعة الأعشاب">
+    <meta name="author" content="المعالج الفيزيائي سلمان">
+    
+    <!-- ربط المانيفست والأيقونات -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+    
+    <!-- الخطوط والمكتبات -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    
+    <style>
+        /* =====================================================
+           شاشة بداية ثابتة - مثل تطبيقات الاندرويد
+           ===================================================== */
+        
+        /* شاشة البداية */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(145deg, #0a2e0f 0%, #1b5e20 50%, #2e7d32 100%);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: opacity 0.3s ease;
+        }
+        
+        /* إخفاء الشاشة */
+        .splash-screen.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* شعار التطبيق */
+        .splash-logo {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .splash-logo i {
+            font-size: 52px;
+            color: white;
+        }
+        
+        /* اسم التطبيق */
+        .splash-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+        
+        /* النص الفرعي */
+        .splash-subtitle {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        /* المؤشر الدائري */
+        .splash-spinner {
+            width: 32px;
+            height: 32px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* إصدار التطبيق */
+        .splash-version {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+        
+        /* لا توجد حركات أخرى - فقط المؤشر الدائري */
+    </style>
+</head>
+<body>
+    <!-- ========== شاشة البداية الثابتة ========== -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-logo">
+            <i class="fas fa-leaf"></i>
+        </div>
+        <div class="splash-title">موسوعة الأعشاب الطبية</div>
+        <div class="splash-subtitle">تطبيق متقدم | الإصدار 6.0</div>
+        <div class="splash-spinner"></div>
+        <div class="splash-version">تطوير: المعالج الفيزيائي سلمان</div>
+    </div>
+
+    <!-- ========== التطبيق الرئيسي ========== -->
+    <div id="mainApp" style="display: none;">
+        <div class="app-container">
+            <!-- الهيدر -->
+            <div class="header">
+                <div class="logo-area">
+                    <div class="logo-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>موسوعة الأعشاب الطبية</h1>
+                        <p>مزامنة سحابية فورية | تطبيق متقدم</p>
+                    </div>
+                </div>
+                <div class="header-buttons">
+                    <div class="icon-btn admin-only" id="logoutBtn" title="تسجيل الخروج">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </div>
+                    <div class="icon-btn" id="lockIcon" title="تسجيل الدخول كمسؤول">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="icon-btn" id="installPwaBtn" style="display:none;" title="تثبيت التطبيق">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div class="icon-btn" id="helpBtn" title="مساعدة">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <div class="theme-switch" id="themeToggle">
+                        <button class="theme-btn sun-btn" id="lightModeBtn"><i class="fas fa-sun"></i></button>
+                        <button class="theme-btn moon-btn" id="darkModeBtn"><i class="fas fa-moon"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- شريط الأدوات الرئيسي -->
+            <div class="toolbar">
+                <div class="view-toggle" id="viewToggle">
+                    <button data-view="all" class="view-btn active">🌿 جميع الأعشاب</button>
+                    <button data-view="categories" class="view-btn">📂 التصنيفات</button>
+                </div>
+                
+                <!-- شريط البحث العريض -->
+                <div class="search-bar-wrapper">
+                    <div class="search-bar-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="wideSearchInput" class="wide-search-input" placeholder="🔍 ابحث عن عشبة...">
+                        <button class="search-clear-btn" id="clearSearchBtn" style="display: none;">
+                            <i class="fas fa-times-circle"></i>
+                        </button>
+                    </div>
+                    <div id="wideSearchResults" class="wide-search-results"></div>
+                </div>
+                
+                <button id="searchBtn" class="tool-btn"><i class="fas fa-search-plus"></i> بحث متقدم</button>
+                <button id="refreshDataBtn" class="tool-btn"><i class="fas fa-sync-alt"></i> تحديث</button>
+                <button id="manageCategoriesBtn" class="tool-btn admin-only"><i class="fas fa-folder-tree"></i> تصنيفات</button>
+                <button id="addHerbBtn" class="tool-btn admin-only"><i class="fas fa-plus-circle"></i> إضافة عشبة</button>
+                <button id="backupBtn" class="tool-btn admin-only"><i class="fas fa-database"></i> نسخ احتياطي</button>
+                <button id="restoreBtn" class="tool-btn admin-only"><i class="fas fa-upload"></i> استعادة</button>
+                <button id="deleteAllBtn" class="tool-btn admin-only" style="background:var(--danger);color:white;"><i class="fas fa-trash-alt"></i> حذف الكل</button>
+                <button id="deleteAllHerbsOnlyBtn" class="tool-btn admin-only" style="background:#ff9800;color:white;"><i class="fas fa-leaf"></i> مسح الأعشاب فقط</button>
+                <button id="stopSyncBtn" class="tool-btn admin-only"><i class="fas fa-pause"></i> إيقاف المزامنة</button>
+                <button id="startSyncBtn" class="tool-btn admin-only"><i class="fas fa-play"></i> تشغيل المزامنة</button>
+                <button id="resetSyncBtn" class="tool-btn admin-only"><i class="fas fa-sync-alt"></i> إعادة ضبط</button>
+                <button id="requestNotifyBtn" class="tool-btn admin-only"><i class="fas fa-bell"></i> إشعارات</button>
+                <button id="exportCsvBtn" class="tool-btn admin-only"><i class="fas fa-file-csv"></i> تصدير CSV</button>
+                <button id="clearCacheBtn" class="tool-btn admin-only"><i class="fas fa-broom"></i> تنظيف الكاش</button>
+                <button id="systemReportBtn" class="tool-btn admin-only"><i class="fas fa-chart-simple"></i> تقرير</button>
+                <button id="copyAppLinkBtn" class="tool-btn admin-only"><i class="fas fa-link"></i> نسخ الرابط</button>
+                <button id="actionLogBtn" class="tool-btn admin-only"><i class="fas fa-history"></i> سجل</button>
+                <button id="testConnectionBtn" class="tool-btn admin-only"><i class="fas fa-network-wired"></i> اختبار</button>
+                <div id="adminClock" class="admin-clock admin-only"><i class="far fa-clock"></i> <span>--:--:--</span></div>
+                <input type="file" id="restoreFile" accept=".json" style="display:none;">
+                <div class="stats-badge" id="herbCount">0 عشبة</div>
+                <div class="last-update-badge" id="lastUpdateBadge">
+                    <i class="fas fa-clock"></i> <span id="lastUpdateTime">--</span>
+                </div>
+                <div class="contact-phone-btn" id="whatsappBtn"><i class="fab fa-whatsapp"></i> 0932934273</div>
+                <div class="font-size-btn" id="fontSizeToggleBtn"><i class="fas fa-text-height"></i> <span id="fontSizeLabel">عادي</span></div>
+            </div>
+
+            <!-- شريط أدوات الزوار -->
+            <div class="visitor-toolbar visitor-only">
+                <button id="visitorCategoriesBtn" class="visitor-btn"><i class="fas fa-folder-open"></i> التصنيفات</button>
+                <button id="shareAppBtn" class="visitor-btn"><i class="fas fa-share-alt"></i> مشاركة</button>
+                <button id="visitorStatsBtn" class="visitor-btn"><i class="fas fa-chart-line"></i> إحصائياتي</button>
+                <button id="quickHelpBtn" class="visitor-btn"><i class="fas fa-question-circle"></i> مساعدة</button>
+                <button id="visitorResyncBtn" class="visitor-btn resync-btn"><i class="fas fa-sync-alt"></i> مزامنة</button>
+                <button id="visitorClearTempBtn" class="visitor-btn clear-btn"><i class="fas fa-database"></i> حذف المؤقتة</button>
+                <button id="compareBtn" class="visitor-btn"><i class="fas fa-balance-scale"></i> مقارنة</button>
+                <button id="bookmarksBtn" class="visitor-btn"><i class="fas fa-bookmark"></i> إشاراتي</button>
+                <button id="advancedSearchBtn" class="visitor-btn"><i class="fas fa-search-plus"></i> بحث متقدم</button>
+            </div>
+
+            <!-- محتوى التطبيق الديناميكي -->
+            <div id="contentArea"></div>
+
+            <!-- التذييل -->
+            <div class="footer">
+                <p>جميع الحقوق محفوظة © 2026 - تطوير: المعالج الفيزيائي سلمان</p>
+                <p style="font-size: 10px; margin-top: 5px;">✨ تطبيق متقدم | PWA 6.0 | مزامنة سحابية</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- شريط تقدم الحفظ -->
+    <div id="saveProgressBar" class="smart-progress-bar" style="display: none;">
+        <div class="progress-icon"></div>
+        <div class="progress-details">
+            <div class="progress-stage" id="saveProgressStage">جاري الحفظ</div>
+            <div class="progress-status" id="saveProgressStatus">جارٍ رفع البيانات...</div>
+            <div class="progress-bar-track">
+                <div id="saveProgressFill" class="progress-bar-fill"></div>
+            </div>
+        </div>
+        <div class="progress-percent" id="saveProgressPercent">0%</div>
+    </div>
+
+    <!-- ========== المودالات ========== -->
+
+    <!-- مودال إدارة التصنيفات -->
+    <div id="categoryModal" class="modal-glass">
+        <div class="modal-glass-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-folder-tree"></i> إدارة التصنيفات</h3>
+                <div class="close-modal-btn" id="closeCategoryModalBtn"><i class="fas fa-times"></i></div>
+            </div>
+            <div id="categoriesList" style="max-height:350px;overflow-y:auto;margin-bottom:1rem;"></div>
+            <div class="form-group">
+                <label>اسم تصنيف جديد</label>
+                <input type="text" id="newCategoryName" placeholder="مثال: أعشاب هضمية">
+            </div>
+            <div class="modal-actions">
+                <button id="addCategoryBtn" class="btn-primary">إضافة تصنيف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال إضافة/تعديل عشبة -->
+    <div id="herbModal" class="modal-glass">
+        <div class="modal-glass-content">
+            <div class="modal-header">
+                <h3 id="herbModalTitle"><i class="fas fa-seedling"></i> إضافة عشبة</h3>
+                <div class="close-modal-btn" id="closeHerbModalBtn"><i class="fas fa-times"></i></div>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-leaf"></i> الاسم *</label>
+                <input type="text" id="modalHerbName" placeholder="مثال: النعناع">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-tag"></i> التصنيف (اختياري)</label>
+                <select id="modalHerbCategory"></select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-image"></i> صورة العشبة</label>
+                <input type="file" id="herbImageInput" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                <div class="image-actions">
+                    <button type="button" id="uploadImageBtn" class="image-btn primary"><i class="fas fa-cloud-upload-alt"></i> رفع صورة</button>
+                    <button type="button" id="clearImageBtn" class="image-btn danger" style="display:none;"><i class="fas fa-trash-alt"></i> مسح</button>
+                </div>
+                <div id="imagePreviewContainer" style="margin-top: 8px;"></div>
+                <div id="compressInfo" style="font-size:0.7rem; color:var(--text-secondary); margin-top: 4px;"></div>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-heartbeat"></i> الفوائد الصحية</label>
+                <textarea id="modalHerbBenefits" rows="3" placeholder="اذكر الفوائد..."></textarea>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-exclamation-triangle"></i> التحذيرات الهامة</label>
+                <textarea id="modalHerbWarnings" rows="2" placeholder="تحذيرات..."></textarea>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-skull-crosswalk"></i> الأضرار المحتملة</label>
+                <textarea id="modalHerbHarams" rows="2" placeholder="الأضرار..."></textarea>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-mug-hot"></i> طريقة الاستخدام والجرعات</label>
+                <textarea id="modalHerbUsage" rows="2" placeholder="كيفية الاستخدام..."></textarea>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-sticky-note"></i> ملاحظات إضافية</label>
+                <textarea id="modalHerbNotes" rows="2" placeholder="ملاحظات..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button id="cancelHerbModalBtn" class="btn-secondary"><i class="fas fa-times"></i> إلغاء</button>
+                <button id="saveHerbModalBtn" class="btn-primary"><i class="fas fa-save"></i> حفظ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال تفاصيل العشبة -->
+    <div id="detailModal" class="modal-glass">
+        <div class="modal-glass-content">
+            <div class="modal-header">
+                <h3>تفاصيل العشبة</h3>
+                <div class="close-modal-btn" id="closeDetailModalBtn"><i class="fas fa-times"></i></div>
+            </div>
+            <div id="detailContent"></div>
+        </div>
+    </div>
+
+    <!-- مودال البحث -->
+    <div id="searchModal" class="modal-glass">
+        <div class="modal-glass-content">
+            <div class="modal-header">
+                <h3>بحث متقدم</h3>
+                <div class="close-modal-btn" id="closeSearchModalBtn"><i class="fas fa-times"></i></div>
+            </div>
+            <input type="text" id="searchInput" class="search-input" placeholder="🌿 اكتب اسم العشبة...">
+            <div id="searchResults"></div>
+        </div>
+    </div>
+
+    <!-- مودال تسجيل الدخول -->
+    <div id="loginModal" class="modal-glass">
+        <div class="modal-glass-content login-modern">
+            <div class="login-icon"><i class="fas fa-user-shield"></i></div>
+            <div class="login-title">بوابة المسؤول</div>
+            <div class="login-sub">الوصول إلى لوحة التحكم</div>
+            <div class="form-group">
+                <label>البريد الإلكتروني</label>
+                <input type="email" id="adminEmail" placeholder="admin@herbal.com">
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="adminPassword" placeholder="••••••••">
+            </div>
+            <div class="modal-actions">
+                <button id="cancelLoginBtn" class="btn-secondary">رجوع</button>
+                <button id="confirmLoginBtn" class="btn-primary">دخول آمن</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال تأكيد الحذف -->
+    <div id="deleteModal" class="modal-glass">
+        <div class="modal-glass-content">
+            <div class="modal-header">
+                <h3>تأكيد الحذف</h3>
+                <div class="close-modal-btn" id="cancelDeleteBtn"><i class="fas fa-times"></i></div>
+            </div>
+            <p id="deleteMessage"></p>
+            <div class="modal-actions">
+                <button id="confirmDeleteBtn" class="btn-danger">حذف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال تأكيد حذف الكل -->
+    <div id="deleteAllConfirmModal" class="modal-glass">
+        <div class="modal-glass-content">
+            <div class="modal-header">
+                <h3>تحذير</h3>
+                <div class="close-modal-btn" id="closeDeleteAllModalBtn"><i class="fas fa-times"></i></div>
+            </div>
+            <p>حذف جميع الأعشاب والتصنيفات نهائياً؟</p>
+            <div class="modal-actions">
+                <button id="cancelDeleteAllBtn" class="btn-secondary">إلغاء</button>
+                <button id="confirmDeleteAllBtn" class="btn-primary" style="background:var(--danger);">حذف الكل</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال دليل التثبيت -->
+    <div id="installGuideModal" class="modal-glass">
+        <div class="modal-glass-content">
+            <div class="modal-header">
+                <h3>تثبيت التطبيق</h3>
+                <div class="close-modal-btn" id="closeInstallGuideBtn"><i class="fas fa-times"></i></div>
+            </div>
+            <p style="text-align:center;">اضغط القائمة ثم "تثبيت التطبيق"</p>
+            <div class="modal-actions">
+                <button id="closeInstallGuideActBtn" class="btn-primary">فهمت</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== ملفات JavaScript ========== -->
+    
+    <!-- 1. Firebase -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-auth.js"></script>
+    <script src="js/firebase-sync.js"></script>
+
+    <!-- 2. الإعدادات الأساسية -->
+    <script src="js/config/constants.js"></script>
+    <script src="js/config/app-config.js"></script>
+
+    <!-- 3. الدوال الأساسية (Core) -->
+    <script src="js/core/utils.js"></script>
+    <script src="js/core/cache.js"></script>
+    <script src="js/core/ui.js"></script>
+
+    <!-- 4. ميزات التطبيق (Features) -->
+    <script src="js/features/compare.js"></script>
+    <script src="js/features/bookmarks.js"></script>
+    <script src="js/features/search.js"></script>
+    <script src="js/features/herbs.js"></script>
+    <script src="js/features/categories.js"></script>
+    <script src="js/features/firebase-admin.js"></script>
+
+    <!-- 5. ربط الأحداث -->
+    <script src="js/events.js"></script>
+
+    <!-- 6. الملف الرئيسي -->
+    <script src="js/app.js"></script>
+
+    <!-- 7. PWA والتثبيت -->
+    <script src="js/pwa.js"></script>
+    <script src="js/app-install.js"></script>
+    <script src="js/performance-optimizer.js"></script>
+
+    <script>
+        // ========== إخفاء شاشة البداية بعد تحميل التطبيق ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // زر المساعدة
+            const helpBtn = document.getElementById('helpBtn');
+            if (helpBtn) {
+                helpBtn.addEventListener('click', function() {
+                    window.location.href = './help.html';
+                });
+            }
+            
+            // تحديث آخر تحديث من localStorage
+            const lastUpdate = localStorage.getItem('herbal_last_update');
+            if (lastUpdate) {
+                const date = new Date(parseInt(lastUpdate));
+                const timeSpan = document.getElementById('lastUpdateTime');
+                if (timeSpan) {
+                    const now = new Date();
+                    const diffHours = Math.floor((now - date) / (1000 * 60 * 60));
+                    if (diffHours < 1) {
+                        timeSpan.innerText = 'الآن';
+                    } else if (diffHours < 24) {
+                        timeSpan.innerText = `منذ ${diffHours} ساعة`;
+                    } else {
+                        timeSpan.innerText = date.toLocaleDateString('ar-EG');
+                    }
+                }
+            }
+            
+            // إخفاء شاشة البداية بعد 2 ثانية (مثل تطبيقات الاندرويد)
+            setTimeout(function() {
+                var splash = document.getElementById('splashScreen');
+                var mainApp = document.getElementById('mainApp');
+                if (splash && mainApp) {
+                    splash.classList.add('hide');
+                    setTimeout(function() {
+                        mainApp.style.display = 'block';
+                    }, 300);
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
