@@ -226,35 +226,209 @@ body {
     max-width: 1400px;
     margin: 0 auto;
     padding: var(--md-space-4);
+    /* الهيدر أصبح position:fixed (خارج تدفق الصفحة)، فنعوّض المساحة التي كان
+       يشغلها بمقدار ديناميكي يُحسب فعلياً بجافاسكربت (متغير --header-offset)
+       حتى لا يتداخل مع بداية شريط الأدوات مهما تغير ارتفاع الهيدر. */
+    padding-top: var(--header-offset, 104px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
     min-height: 100vh;
     min-height: 100dvh;
 }
 
-/* ========== الهيدر المتقدم (شريط علوي ثابت وآمن) ========== */
+/* ========== الهيدر المتقدم (شريط علوي ثابت فعلياً وملتصق بأعلى الشاشة،
+   بعرض كامل بدل شكل البطاقة العائمة في المنتصف) ========== */
 .header {
-    position: sticky;
-    /* يبقى الهيدر أسفل شريط الحالة دائمًا ولا يختفي خلفه */
-    top: env(safe-area-inset-top);
-    z-index: 100;
-    background: color-mix(in srgb, var(--md-surface) 92%, transparent);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 500;
+    background: color-mix(in srgb, var(--md-surface) 96%, transparent);
     backdrop-filter: blur(16px) saturate(160%);
     -webkit-backdrop-filter: blur(16px) saturate(160%);
-    border-radius: var(--md-radius-xl);
-    padding: var(--md-space-3) var(--md-space-5);
+    border-radius: 0;
+    padding: calc(env(safe-area-inset-top, 0px) + var(--md-space-3)) var(--md-space-5) var(--md-space-3);
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: var(--md-space-3);
-    margin-bottom: var(--md-space-4);
     box-shadow: var(--md-shadow);
-    border: 1px solid var(--md-outline-variant);
-    transition: box-shadow var(--md-motion-duration-medium) var(--md-motion-easing),
-                transform var(--md-motion-duration-medium) var(--md-motion-easing);
+    border: none;
+    border-bottom: 1px solid var(--md-outline-variant);
+    transition: box-shadow var(--md-motion-duration-medium) var(--md-motion-easing);
 }
 
 .header:hover {
     box-shadow: var(--md-shadow-md);
+}
+
+/* زر فتح القائمة الجانبية (الهامبرغر) - العنصر الوحيد إلى جانب الشعار في الهيدر */
+.menu-toggle-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--md-radius-full);
+    background: var(--md-surface-dim);
+    border: 1px solid var(--md-outline-variant);
+    color: var(--md-on-surface-variant);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all var(--md-motion-duration-short) var(--md-motion-easing);
+}
+
+.menu-toggle-btn:active {
+    transform: scale(0.94);
+    background: var(--md-primary);
+    border-color: var(--md-primary);
+    color: var(--md-on-primary);
+}
+
+/* ========== القائمة الجانبية الموحّدة (تجمع البحث وكل الأدوات) ========== */
+.side-menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1500;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--md-motion-duration-long) ease;
+}
+
+.side-menu-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.side-menu {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 320px;
+    max-width: 86vw;
+    background: var(--md-surface);
+    z-index: 1600;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.25);
+    transform: translateX(-100%);
+    transition: transform var(--md-motion-duration-long) var(--md-motion-easing-emphasized);
+    display: flex;
+    flex-direction: column;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.side-menu.open {
+    transform: translateX(0);
+}
+
+.side-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--md-space-4) var(--md-space-5);
+    border-bottom: 1px solid var(--md-outline-variant);
+    flex-shrink: 0;
+}
+
+.side-menu-title {
+    font-weight: 700;
+    font-size: var(--md-font-title-medium);
+    color: var(--md-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-2);
+}
+
+.side-menu-close {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--md-radius-full);
+    border: 1px solid var(--md-outline-variant);
+    background: var(--md-surface-dim);
+    color: var(--md-on-surface-variant);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.side-menu-close:active {
+    transform: scale(0.94);
+}
+
+.side-menu-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--md-space-4) var(--md-space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-5);
+}
+
+.side-menu-section-title {
+    font-size: var(--md-font-label-small);
+    font-weight: 700;
+    color: var(--md-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: var(--md-space-2);
+}
+
+/* داخل القائمة: شريط البحث ثابت أعلى القائمة (وليس عائمًا فوق الصفحة) */
+.side-menu .search-bar-wrapper {
+    width: 100%;
+}
+
+/* داخل القائمة: الأزرار والأدوات تُعرض كقائمة عمودية بدل صف أفقي مزدحم */
+.side-menu .toolbar,
+.side-menu .visitor-toolbar {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 0;
+}
+
+.side-menu .tool-btn,
+.side-menu .visitor-btn {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: var(--md-radius-md);
+    padding: var(--md-space-3) var(--md-space-4);
+}
+
+.side-menu .view-toggle {
+    width: 100%;
+}
+
+.side-menu .view-toggle .view-btn {
+    flex: 1;
+}
+
+.side-menu .theme-switch {
+    align-self: flex-start;
+}
+
+.side-menu .icon-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--md-space-2);
+}
+
+.side-menu .stats-badge,
+.side-menu .last-update-badge,
+.side-menu .contact-phone-btn,
+.side-menu .font-size-btn,
+.side-menu .admin-clock {
+    width: 100%;
+    justify-content: center;
+    margin-right: 0;
 }
 
 .logo-area {
@@ -432,11 +606,71 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* ========== شريط البحث العريض المتقدم ========== */
+/* ========== شريط البحث (يعيش الآن داخل لوحة الزر العائم بأسفل الشاشة) ========== */
 .search-bar-wrapper {
     position: relative;
-    flex: 1;
-    min-width: 220px;
+    width: 100%;
+}
+
+/* ========== زر البحث العائم (Floating Action Button) ==========
+   بديل شريط البحث الثابت أعلى الصفحة: زر دائري ثابت أسفل الشاشة يفتح
+   لوحة بحث صغيرة فوقه، بدل ازدحام شريط الأدوات العلوي. */
+.fab-search-btn {
+    position: fixed;
+    inset-inline-end: var(--md-space-5);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--md-space-5));
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: none;
+    background: var(--md-primary);
+    color: #fff;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+    cursor: pointer;
+    z-index: 9500;
+    transition: transform var(--md-motion-duration-short) var(--md-motion-easing),
+                background var(--md-motion-duration-short) var(--md-motion-easing);
+}
+
+.fab-search-btn:active {
+    transform: scale(0.92);
+}
+
+.fab-search-btn.open {
+    background: var(--md-primary-dark);
+    transform: rotate(90deg);
+}
+
+.fab-search-panel {
+    position: fixed;
+    inset-inline: var(--md-space-4);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
+    max-width: 480px;
+    margin-inline: auto;
+    background: var(--md-surface);
+    border-radius: var(--md-radius-xl);
+    box-shadow: var(--md-shadow-xl);
+    border: 1px solid var(--md-outline-variant);
+    padding: var(--md-space-3);
+    z-index: 9499;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(14px) scale(0.97);
+    transition: opacity var(--md-motion-duration-medium) var(--md-motion-easing),
+                transform var(--md-motion-duration-medium) var(--md-motion-easing),
+                visibility var(--md-motion-duration-medium);
+}
+
+.fab-search-panel.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
 }
 
 .search-bar-container {
@@ -888,6 +1122,134 @@ body.viewer-mode .visitor-only {
     border-bottom: 2px solid var(--md-primary);
 }
 
+/* ========== مودال المساعدة (مدموج داخل الصفحة) ========== */
+.help-modal-content {
+    max-width: 640px;
+    max-height: 85vh;
+    overflow-y: auto;
+    text-align: right;
+}
+
+.help-welcome {
+    background: linear-gradient(135deg, var(--md-primary), var(--md-primary-dark));
+    color: var(--md-on-primary);
+    border-radius: var(--md-radius-xl);
+    padding: var(--md-space-5);
+    margin-bottom: var(--md-space-5);
+    text-align: center;
+}
+
+.help-welcome h4 {
+    font-size: var(--md-font-title-large);
+    margin-bottom: var(--md-space-2);
+}
+
+.help-welcome p {
+    opacity: 0.9;
+    font-size: var(--md-font-body-medium);
+}
+
+.help-block {
+    margin-bottom: var(--md-space-6);
+}
+
+.help-block > h4 {
+    color: var(--md-primary);
+    font-size: var(--md-font-title-medium);
+    margin-bottom: var(--md-space-3);
+    padding-bottom: var(--md-space-2);
+    border-bottom: 2px solid var(--md-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.help-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--md-space-3);
+}
+
+.help-card {
+    background: var(--md-surface-dim);
+    border-radius: var(--md-radius-lg);
+    padding: var(--md-space-4);
+    border-right: 3px solid var(--md-primary);
+}
+
+.help-card h5 {
+    color: var(--md-primary);
+    font-size: var(--md-font-body-large);
+    margin-bottom: var(--md-space-2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.help-card p {
+    font-size: var(--md-font-body-small);
+    line-height: 1.6;
+    color: var(--md-on-surface-variant);
+}
+
+.help-block .faq-item {
+    background: var(--md-surface-dim);
+    border-radius: var(--md-radius-lg);
+    padding: var(--md-space-4);
+    margin-bottom: var(--md-space-3);
+    cursor: pointer;
+}
+
+.help-block .faq-question {
+    font-weight: 700;
+    color: var(--md-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--md-space-2);
+}
+
+.help-block .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--md-motion-duration-medium) ease;
+    color: var(--md-on-surface-variant);
+    font-size: var(--md-font-body-small);
+    line-height: 1.6;
+}
+
+.help-block .faq-item.open .faq-answer {
+    max-height: 260px;
+    margin-top: var(--md-space-3);
+}
+
+.help-block .faq-item.open .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.help-contact {
+    text-align: center;
+    background: var(--md-surface-dim);
+    border-radius: var(--md-radius-xl);
+    padding: var(--md-space-5);
+}
+
+.help-contact i.fab.fa-whatsapp {
+    font-size: 32px;
+    color: var(--md-success);
+    margin-bottom: var(--md-space-2);
+}
+
+.help-contact h5 {
+    margin-bottom: var(--md-space-1);
+}
+
+.help-contact p {
+    color: var(--md-on-surface-variant);
+    font-size: var(--md-font-body-small);
+    margin-bottom: var(--md-space-3);
+}
+
 .modal-header h3 {
     font-size: var(--md-font-title-large);
     font-weight: 700;
@@ -1243,6 +1605,8 @@ body.viewer-mode .visitor-only {
 @media (max-width: 768px) {
     .app-container {
         padding: var(--md-space-3);
+        padding-top: var(--header-offset, 104px);
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
     }
     
     .herbs-grid, .categories-grid {
@@ -1273,7 +1637,19 @@ body.viewer-mode .visitor-only {
     .search-bar-wrapper {
         width: 100%;
     }
-    
+
+    .fab-search-btn {
+        width: 52px;
+        height: 52px;
+        font-size: 19px;
+        inset-inline-end: var(--md-space-4);
+    }
+
+    .fab-search-panel {
+        inset-inline: var(--md-space-3);
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 78px);
+    }
+
     .modal-glass-content {
         padding: var(--md-space-5);
         width: 95%;
@@ -1478,7 +1854,7 @@ body.font-xlarge {
     <!-- ========== التطبيق الرئيسي ========== -->
     <div id="mainApp" style="display: none;">
         <div class="app-container">
-            <!-- الهيدر -->
+            <!-- الهيدر: شعار + زر قائمة واحد فقط (كل شيء آخر داخل القائمة الجانبية) -->
             <div class="header">
                 <div class="logo-area">
                     <div class="logo-icon">
@@ -1489,85 +1865,127 @@ body.font-xlarge {
                         <p>مزامنة سحابية فورية | تطبيق متقدم</p>
                     </div>
                 </div>
-                <div class="header-buttons">
-                    <div class="icon-btn admin-only" id="logoutBtn" title="تسجيل الخروج">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </div>
-                    <div class="icon-btn" id="lockIcon" title="تسجيل الدخول كمسؤول">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <div class="icon-btn" id="installPwaBtn" style="display:none;" title="تثبيت التطبيق">
-                        <i class="fas fa-download"></i>
-                    </div>
-                    <div class="icon-btn" id="helpBtn" title="مساعدة">
-                        <i class="fas fa-question-circle"></i>
-                    </div>
-                    <div class="theme-switch" id="themeToggle">
-                        <button class="theme-btn sun-btn" id="lightModeBtn"><i class="fas fa-sun"></i></button>
-                        <button class="theme-btn moon-btn" id="darkModeBtn"><i class="fas fa-moon"></i></button>
-                    </div>
-                </div>
+                <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="فتح القائمة" title="القائمة">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
 
-            <!-- شريط الأدوات الرئيسي -->
-            <div class="toolbar">
-                <div class="view-toggle" id="viewToggle">
-                    <button data-view="all" class="view-btn active">🌿 جميع الأعشاب</button>
-                    <button data-view="categories" class="view-btn">📂 التصنيفات</button>
-                </div>
-                
-                <!-- شريط البحث العريض -->
-                <div class="search-bar-wrapper">
-                    <div class="search-bar-container">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" id="wideSearchInput" class="wide-search-input" placeholder="🔍 ابحث عن عشبة...">
-                        <button class="search-clear-btn" id="clearSearchBtn" style="display: none;">
-                            <i class="fas fa-times-circle"></i>
-                        </button>
-                    </div>
-                    <div id="wideSearchResults" class="wide-search-results"></div>
-                </div>
-                
-                <button id="searchBtn" class="tool-btn"><i class="fas fa-search-plus"></i> بحث متقدم</button>
-                <button id="refreshDataBtn" class="tool-btn"><i class="fas fa-sync-alt"></i> تحديث</button>
-                <button id="manageCategoriesBtn" class="tool-btn admin-only"><i class="fas fa-folder-tree"></i> تصنيفات</button>
-                <button id="addHerbBtn" class="tool-btn admin-only"><i class="fas fa-plus-circle"></i> إضافة عشبة</button>
-                <button id="backupBtn" class="tool-btn admin-only"><i class="fas fa-database"></i> نسخ احتياطي</button>
-                <button id="restoreBtn" class="tool-btn admin-only"><i class="fas fa-upload"></i> استعادة</button>
-                <button id="deleteAllBtn" class="tool-btn admin-only" style="background:var(--danger);color:white;"><i class="fas fa-trash-alt"></i> حذف الكل</button>
-                <button id="deleteAllHerbsOnlyBtn" class="tool-btn admin-only" style="background:#ff9800;color:white;"><i class="fas fa-leaf"></i> مسح الأعشاب فقط</button>
-                <button id="stopSyncBtn" class="tool-btn admin-only"><i class="fas fa-pause"></i> إيقاف المزامنة</button>
-                <button id="startSyncBtn" class="tool-btn admin-only"><i class="fas fa-play"></i> تشغيل المزامنة</button>
-                <button id="resetSyncBtn" class="tool-btn admin-only"><i class="fas fa-sync-alt"></i> إعادة ضبط</button>
-                <button id="requestNotifyBtn" class="tool-btn admin-only"><i class="fas fa-bell"></i> إشعارات</button>
-                <button id="exportCsvBtn" class="tool-btn admin-only"><i class="fas fa-file-csv"></i> تصدير CSV</button>
-                <button id="clearCacheBtn" class="tool-btn admin-only"><i class="fas fa-broom"></i> تنظيف الكاش</button>
-                <button id="systemReportBtn" class="tool-btn admin-only"><i class="fas fa-chart-simple"></i> تقرير</button>
-                <button id="copyAppLinkBtn" class="tool-btn admin-only"><i class="fas fa-link"></i> نسخ الرابط</button>
-                <button id="actionLogBtn" class="tool-btn admin-only"><i class="fas fa-history"></i> سجل</button>
-                <button id="testConnectionBtn" class="tool-btn admin-only"><i class="fas fa-network-wired"></i> اختبار</button>
-                <div id="adminClock" class="admin-clock admin-only"><i class="far fa-clock"></i> <span>--:--:--</span></div>
-                <input type="file" id="restoreFile" accept=".json" style="display:none;">
-                <div class="stats-badge" id="herbCount">0 عشبة</div>
-                <div class="last-update-badge" id="lastUpdateBadge">
-                    <i class="fas fa-clock"></i> <span id="lastUpdateTime">--</span>
-                </div>
-                <div class="contact-phone-btn" id="whatsappBtn"><i class="fab fa-whatsapp"></i> 0932934273</div>
-                <div class="font-size-btn" id="fontSizeToggleBtn"><i class="fas fa-text-height"></i> <span id="fontSizeLabel">عادي</span></div>
-            </div>
+            <!-- الطبقة الخلفية للقائمة الجانبية -->
+            <div class="side-menu-overlay" id="sideMenuOverlay"></div>
 
-            <!-- شريط أدوات الزوار -->
-            <div class="visitor-toolbar visitor-only">
-                <button id="visitorCategoriesBtn" class="visitor-btn"><i class="fas fa-folder-open"></i> التصنيفات</button>
-                <button id="shareAppBtn" class="visitor-btn"><i class="fas fa-share-alt"></i> مشاركة</button>
-                <button id="visitorStatsBtn" class="visitor-btn"><i class="fas fa-chart-line"></i> إحصائياتي</button>
-                <button id="quickHelpBtn" class="visitor-btn"><i class="fas fa-question-circle"></i> مساعدة</button>
-                <button id="visitorResyncBtn" class="visitor-btn resync-btn"><i class="fas fa-sync-alt"></i> مزامنة</button>
-                <button id="visitorClearTempBtn" class="visitor-btn clear-btn"><i class="fas fa-database"></i> حذف المؤقتة</button>
-                <button id="compareBtn" class="visitor-btn"><i class="fas fa-balance-scale"></i> مقارنة</button>
-                <button id="bookmarksBtn" class="visitor-btn"><i class="fas fa-bookmark"></i> إشاراتي</button>
-                <button id="advancedSearchBtn" class="visitor-btn"><i class="fas fa-search-plus"></i> بحث متقدم</button>
-            </div>
+            <!-- القائمة الجانبية الموحّدة: تجمع البحث وكل الأدوات في مكان واحد -->
+            <aside class="side-menu" id="sideMenu" aria-hidden="true">
+                <div class="side-menu-header">
+                    <div class="side-menu-title"><i class="fas fa-leaf"></i> القائمة</div>
+                    <button class="side-menu-close" id="sideMenuCloseBtn" aria-label="إغلاق القائمة">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="side-menu-body">
+                    <!-- شريط البحث -->
+                    <div>
+                        <div class="side-menu-section-title">البحث</div>
+                        <div class="search-bar-wrapper">
+                            <div class="search-bar-container">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="wideSearchInput" class="wide-search-input" placeholder="🔍 ابحث عن عشبة...">
+                                <button class="search-clear-btn" id="clearSearchBtn" style="display: none;">
+                                    <i class="fas fa-times-circle"></i>
+                                </button>
+                            </div>
+                            <div id="wideSearchResults" class="wide-search-results"></div>
+                        </div>
+                    </div>
+
+                    <!-- طريقة العرض والمظهر -->
+                    <div>
+                        <div class="side-menu-section-title">العرض</div>
+                        <div class="view-toggle" id="viewToggle" style="margin-bottom: var(--md-space-3);">
+                            <button data-view="all" class="view-btn active">🌿 جميع الأعشاب</button>
+                            <button data-view="categories" class="view-btn">📂 التصنيفات</button>
+                        </div>
+                        <div class="theme-switch" id="themeToggle">
+                            <button class="theme-btn sun-btn" id="lightModeBtn"><i class="fas fa-sun"></i></button>
+                            <button class="theme-btn moon-btn" id="darkModeBtn"><i class="fas fa-moon"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- الحساب والمساعدة -->
+                    <div>
+                        <div class="side-menu-section-title">الحساب</div>
+                        <div class="icon-row">
+                            <div class="icon-btn admin-only" id="logoutBtn" title="تسجيل الخروج">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </div>
+                            <div class="icon-btn" id="lockIcon" title="تسجيل الدخول كمسؤول">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="icon-btn" id="installPwaBtn" style="display:none;" title="تثبيت التطبيق">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <div class="icon-btn" id="helpBtn" title="مساعدة">
+                                <i class="fas fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- أدوات التطبيق -->
+                    <div>
+                        <div class="side-menu-section-title">الأدوات</div>
+                        <div class="toolbar">
+                            <button id="searchBtn" class="tool-btn"><i class="fas fa-search-plus"></i> بحث متقدم</button>
+                            <button id="refreshDataBtn" class="tool-btn"><i class="fas fa-sync-alt"></i> تحديث</button>
+                            <button id="manageCategoriesBtn" class="tool-btn admin-only"><i class="fas fa-folder-tree"></i> تصنيفات</button>
+                            <button id="addHerbBtn" class="tool-btn admin-only"><i class="fas fa-plus-circle"></i> إضافة عشبة</button>
+                            <button id="backupBtn" class="tool-btn admin-only"><i class="fas fa-database"></i> نسخ احتياطي</button>
+                            <button id="restoreBtn" class="tool-btn admin-only"><i class="fas fa-upload"></i> استعادة</button>
+                            <button id="deleteAllBtn" class="tool-btn admin-only" style="background:var(--danger);color:white;"><i class="fas fa-trash-alt"></i> حذف الكل</button>
+                            <button id="deleteAllHerbsOnlyBtn" class="tool-btn admin-only" style="background:#ff9800;color:white;"><i class="fas fa-leaf"></i> مسح الأعشاب فقط</button>
+                            <button id="stopSyncBtn" class="tool-btn admin-only"><i class="fas fa-pause"></i> إيقاف المزامنة</button>
+                            <button id="startSyncBtn" class="tool-btn admin-only"><i class="fas fa-play"></i> تشغيل المزامنة</button>
+                            <button id="resetSyncBtn" class="tool-btn admin-only"><i class="fas fa-sync-alt"></i> إعادة ضبط</button>
+                            <button id="requestNotifyBtn" class="tool-btn admin-only"><i class="fas fa-bell"></i> إشعارات</button>
+                            <button id="exportCsvBtn" class="tool-btn admin-only"><i class="fas fa-file-csv"></i> تصدير CSV</button>
+                            <button id="clearCacheBtn" class="tool-btn admin-only"><i class="fas fa-broom"></i> تنظيف الكاش</button>
+                            <button id="systemReportBtn" class="tool-btn admin-only"><i class="fas fa-chart-simple"></i> تقرير</button>
+                            <button id="copyAppLinkBtn" class="tool-btn admin-only"><i class="fas fa-link"></i> نسخ الرابط</button>
+                            <button id="actionLogBtn" class="tool-btn admin-only"><i class="fas fa-history"></i> سجل</button>
+                            <button id="testConnectionBtn" class="tool-btn admin-only"><i class="fas fa-network-wired"></i> اختبار</button>
+                            <div id="adminClock" class="admin-clock admin-only"><i class="far fa-clock"></i> <span>--:--:--</span></div>
+                            <input type="file" id="restoreFile" accept=".json" style="display:none;">
+                        </div>
+                    </div>
+
+                    <!-- أدوات الزوار -->
+                    <div>
+                        <div class="side-menu-section-title">أدوات إضافية</div>
+                        <div class="visitor-toolbar visitor-only">
+                            <button id="visitorCategoriesBtn" class="visitor-btn"><i class="fas fa-folder-open"></i> التصنيفات</button>
+                            <button id="shareAppBtn" class="visitor-btn"><i class="fas fa-share-alt"></i> مشاركة</button>
+                            <button id="visitorStatsBtn" class="visitor-btn"><i class="fas fa-chart-line"></i> إحصائياتي</button>
+                            <button id="quickHelpBtn" class="visitor-btn"><i class="fas fa-question-circle"></i> مساعدة</button>
+                            <button id="visitorResyncBtn" class="visitor-btn resync-btn"><i class="fas fa-sync-alt"></i> مزامنة</button>
+                            <button id="visitorClearTempBtn" class="visitor-btn clear-btn"><i class="fas fa-database"></i> حذف المؤقتة</button>
+                            <button id="compareBtn" class="visitor-btn"><i class="fas fa-balance-scale"></i> مقارنة</button>
+                            <button id="bookmarksBtn" class="visitor-btn"><i class="fas fa-bookmark"></i> إشاراتي</button>
+                            <button id="advancedSearchBtn" class="visitor-btn"><i class="fas fa-search-plus"></i> بحث متقدم</button>
+                        </div>
+                    </div>
+
+                    <!-- إحصائيات ومعلومات -->
+                    <div>
+                        <div class="side-menu-section-title">معلومات</div>
+                        <div style="display:flex; flex-direction:column; gap: var(--md-space-2);">
+                            <div class="stats-badge" id="herbCount">0 عشبة</div>
+                            <div class="last-update-badge" id="lastUpdateBadge">
+                                <i class="fas fa-clock"></i> <span id="lastUpdateTime">--</span>
+                            </div>
+                            <div class="contact-phone-btn" id="whatsappBtn"><i class="fab fa-whatsapp"></i> 0932934273</div>
+                            <div class="font-size-btn" id="fontSizeToggleBtn"><i class="fas fa-text-height"></i> <span id="fontSizeLabel">عادي</span></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
 
             <!-- محتوى التطبيق الديناميكي -->
             <div id="contentArea"></div>
@@ -1751,6 +2169,117 @@ body.font-xlarge {
             </div>
         </div>
     </div>
+
+    <!-- مودال المساعدة (مدموج داخل الصفحة نفسها، بدون تنقل لصفحة help.html منفصلة) -->
+    <div id="helpModal" class="modal-glass">
+        <div class="modal-glass-content help-modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-question-circle"></i> مساعدة الزوار</h3>
+                <div class="close-modal-btn" id="closeHelpModalBtn"><i class="fas fa-times"></i></div>
+            </div>
+
+            <div class="help-welcome">
+                <h4>🌿 مرحباً بك في موسوعة الأعشاب الطبية</h4>
+                <p>هذا الدليل يساعدك في استخدام جميع ميزات التطبيق بسهولة</p>
+            </div>
+
+            <div class="help-block">
+                <h4><i class="fas fa-compass"></i> دليل الاستخدام السريع</h4>
+                <div class="help-grid">
+                    <div class="help-card">
+                        <h5><i class="fas fa-search"></i> البحث عن عشبة</h5>
+                        <p>اضغط على زر البحث في شريط الأدوات، أو زر البحث العائم أسفل الشاشة، ثم اكتب اسم العشبة.</p>
+                    </div>
+                    <div class="help-card">
+                        <h5><i class="fas fa-folder-tree"></i> التصنيفات</h5>
+                        <p>اضغط على "التصنيفات" لعرض الأعشاب مصنفة حسب الفوائد والاستخدامات.</p>
+                    </div>
+                    <div class="help-card">
+                        <h5><i class="fas fa-balance-scale"></i> مقارنة الأعشاب</h5>
+                        <p>قارن بين عشبتين أو أكثر من حيث الفوائد والتحذيرات والأضرار لاختيار الأنسب لك.</p>
+                    </div>
+                    <div class="help-card">
+                        <h5><i class="fas fa-bookmark"></i> الإشارات المرجعية</h5>
+                        <p>أضف الأعشاب المفضلة لديك إلى الإشارات المرجعية للوصول إليها بسرعة لاحقاً.</p>
+                    </div>
+                    <div class="help-card">
+                        <h5><i class="fas fa-print"></i> طباعة المعلومات</h5>
+                        <p>يمكنك طباعة معلومات أي عشبة للاحتفاظ بها أو مشاركتها مع الآخرين.</p>
+                    </div>
+                    <div class="help-card">
+                        <h5><i class="fas fa-chart-line"></i> إحصائيات الزوار</h5>
+                        <p>تابع إحصائيات استخدامك للتطبيق مثل عدد زياراتك والأعشاب المفضلة لديك.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="help-block">
+                <h4><i class="fas fa-question-circle"></i> الأسئلة الشائعة</h4>
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <div class="faq-question"><span><i class="fas fa-cloud-download-alt"></i> هل يمكن استخدام التطبيق بدون إنترنت؟</span><i class="fas fa-chevron-down"></i></div>
+                        <div class="faq-answer">نعم! بمجرد تحميل البيانات لأول مرة، يمكنك استخدام التطبيق في وضع عدم الاتصال. سيتم عرض البيانات المخزنة محلياً على جهازك.</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question"><span><i class="fas fa-moon"></i> كيف يمكن تغيير مظهر التطبيق؟</span><i class="fas fa-chevron-down"></i></div>
+                        <div class="faq-answer">اضغط على زر الوضع الليلي 🌙/☀️ في أعلى الشاشة للتبديل بين المظهر النهاري والليلي.</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question"><span><i class="fas fa-text-height"></i> كيف يمكن تغيير حجم الخط؟</span><i class="fas fa-chevron-down"></i></div>
+                        <div class="faq-answer">اضغط على زر "Aa" في شريط الأدوات لتغيير حجم الخط بين (عادي، كبير، أكبر) حسب راحتك في القراءة.</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question"><span><i class="fas fa-download"></i> كيف أثبت التطبيق على جهازي؟</span><i class="fas fa-chevron-down"></i></div>
+                        <div class="faq-answer">في متصفح Chrome: اضغط على القائمة (⋮) ثم اختر "تثبيت التطبيق".<br>في Safari: اضغط على مشاركة ثم "إضافة إلى الشاشة الرئيسية".</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question"><span><i class="fas fa-sync-alt"></i> كيف يتم تحديث بيانات الأعشاب؟</span><i class="fas fa-chevron-down"></i></div>
+                        <div class="faq-answer">يتم تحديث البيانات تلقائياً عند وجود اتصال بالإنترنت. يمكنك أيضاً الضغط على زر "تحديث" في شريط الأدوات للحصول على أحدث البيانات.</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question"><span><i class="fas fa-shield-alt"></i> هل بياناتي آمنة؟</span><i class="fas fa-chevron-down"></i></div>
+                        <div class="faq-answer">نعم تماماً. التطبيق لا يجمع أي معلومات شخصية عنك. جميع البيانات التي تحفظها (إشارات مرجعية، مقارنات) تخزن فقط على جهازك.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="help-block">
+                <h4><i class="fas fa-lightbulb"></i> نصائح سريعة</h4>
+                <div class="help-grid">
+                    <div class="help-card">
+                        <h5><i class="fas fa-search-plus"></i> البحث المتقدم</h5>
+                        <p>استخدم زر "بحث متقدم" للبحث في الفوائد أو التحذيرات وليس فقط الأسماء.</p>
+                    </div>
+                    <div class="help-card">
+                        <h5><i class="fas fa-share-alt"></i> مشاركة التطبيق</h5>
+                        <p>اضغط على "مشاركة" لإرسال رابط الموسوعة لأصدقائك وعائلتك.</p>
+                    </div>
+                    <div class="help-card">
+                        <h5><i class="fas fa-database"></i> حذف المؤقتة</h5>
+                        <p>إذا واجهت أي مشكلة، استخدم زر "حذف المؤقتة" لمسح الكاش وإعادة تحميل التطبيق.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="help-contact">
+                <i class="fab fa-whatsapp"></i>
+                <h5>تواصل مع المطور</h5>
+                <p>للاستفسارات أو الاقتراحات، يمكنك التواصل عبر واتساب</p>
+                <button class="btn-primary" onclick="window.open('https://wa.me/9630932934273', '_blank')">
+                    <i class="fab fa-whatsapp"></i> 0932934273
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // فتح مودال المساعدة (بديل التنقل لصفحة help.html منفصلة)
+        function openHelpModal() {
+            const modal = document.getElementById('helpModal');
+            if (modal) modal.classList.add('active');
+        }
+        window.openHelpModal = openHelpModal;
+    </script>
 
     <!-- ========== ملفات JavaScript ========== -->
     
@@ -4409,7 +4938,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========== أزرار الهيدر ==========
     const helpBtn = document.getElementById('helpBtn');
     if (helpBtn) {
-        helpBtn.addEventListener('click', () => window.location.href = './help.html');
+        helpBtn.addEventListener('click', () => openHelpModal());
     }
 
     const lockIcon = document.getElementById('lockIcon');
@@ -4706,7 +5235,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const quickHelpBtn = document.getElementById('quickHelpBtn');
     if (quickHelpBtn) {
-        quickHelpBtn.addEventListener('click', () => window.location.href = './help.html');
+        quickHelpBtn.addEventListener('click', () => openHelpModal());
     }
 
     const visitorResyncBtn = document.getElementById('visitorResyncBtn');
@@ -4794,6 +5323,25 @@ document.addEventListener('DOMContentLoaded', function() {
             if (modal) modal.classList.remove('active');
         });
     }
+
+    // ========== مودال المساعدة (مدموج داخل الصفحة، بدون تنقل لصفحة منفصلة) ==========
+    const closeHelpModalBtn = document.getElementById('closeHelpModalBtn');
+    if (closeHelpModalBtn) {
+        closeHelpModalBtn.addEventListener('click', () => {
+            const modal = document.getElementById('helpModal');
+            if (modal) modal.classList.remove('active');
+        });
+    }
+
+    // فتح/طي الأسئلة الشائعة داخل مودال المساعدة
+    document.querySelectorAll('#helpModal .faq-item').forEach(item => {
+        const question = item.querySelector('.faq-question');
+        if (question) {
+            question.addEventListener('click', () => {
+                item.classList.toggle('open');
+            });
+        }
+    });
 
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
     if (cancelDeleteBtn) {
@@ -5822,114 +6370,32 @@ const PWAManager = {
         this.setupScreenOrientation();
     },
     
-    // تسجيل Service Worker متقدم
+    // تسجيل Service Worker (يستخدم دائمًا ملف sw.js الحقيقي على القرص، وليس
+    // نسخة مُولّدة داخليًا عبر Blob URL؛ وجود نسختين متضاربتين من الـ
+    // Service Worker لنفس النطاق هو ما كان يسبب تقديم نسخة قديمة مخزّنة من
+    // الصفحة أحيانًا، وظهور شاشة "لا يوجد اتصال" بعد التنقل بين الصفحات).
     registerServiceWorker: async function() {
         if (!('serviceWorker' in navigator)) {
             console.log('[PWA] Service Worker غير مدعوم');
             return false;
         }
-        
+
         try {
-            const swCode = `// Service Worker متقدم لتجربة تطبيق حقيقي
-const CACHE_NAME = 'herbal-app-v8';
-const STATIC_CACHE = 'herbal-static-v8';
-const DATA_CACHE = 'herbal-data-v8';
-const IMAGE_CACHE = 'herbal-images-v8';
-
-const STATIC_ASSETS = [
-    '.', './', './index.html', './manifest.json', './offline.html'
-];
-
-self.addEventListener('install', event => {
-    self.skipWaiting();
-    event.waitUntil(
-        caches.open(STATIC_CACHE).then(cache => cache.addAll(STATIC_ASSETS))
-    );
-});
-
-self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(keys => Promise.all(
-            keys.map(key => {
-                if (key !== STATIC_CACHE && key !== DATA_CACHE && 
-                    key !== IMAGE_CACHE && key !== CACHE_NAME) {
-                    return caches.delete(key);
-                }
-            })
-        )).then(() => self.clients.claim())
-    );
-});
-
-self.addEventListener('fetch', event => {
-    const url = new URL(event.request.url);
-    
-    if (event.request.destination === 'image') {
-        event.respondWith(
-            caches.match(event.request).then(cached => {
-                const fetchPromise = fetch(event.request).then(response => {
-                    if (response && response.status === 200) {
-                        caches.open(IMAGE_CACHE).then(cache => cache.put(event.request, response.clone()));
-                    }
-                    return response;
-                }).catch(() => cached);
-                return cached || fetchPromise;
-            })
-        );
-        return;
-    }
-    
-    if (event.request.mode === 'navigate') {
-        event.respondWith(
-            fetch(event.request).catch(() => caches.match('./offline.html'))
-        );
-        return;
-    }
-    
-    event.respondWith(
-        caches.match(event.request).then(cached => {
-            return cached || fetch(event.request).then(response => {
-                const clone = response.clone();
-                caches.open(DATA_CACHE).then(cache => cache.put(event.request, clone));
-                return response;
-            });
-        })
-    );
-});
-
-self.addEventListener('sync', event => {
-    if (event.tag === 'sync-herbs') {
-        event.waitUntil(
-            fetch('/api/sync').catch(() => console.log('Sync failed'))
-        );
-    }
-});
-
-self.addEventListener('push', event => {
-    let data = { title: '🌿 موسوعة الأعشاب', body: 'تحديث جديد!' };
-    if (event.data) {
-        try { data = event.data.json(); } catch(e) { data.body = event.data.text(); }
-    }
-    event.waitUntil(
-        self.registration.showNotification(data.title, {
-            body: data.body,
-            icon: '/icons/icon-192.png',
-            badge: '/icons/icon-72.png',
-            vibrate: [200, 100, 200],
-            data: { url: './' }
-        })
-    );
-});
-
-self.addEventListener('notificationclick', event => {
-    event.notification.close();
-    event.waitUntil(clients.openWindow(event.notification.data?.url || './'));
-});`;
-            
-            const swBlob = new Blob([swCode], { type: 'application/javascript' });
-            const swURL = URL.createObjectURL(swBlob);
-            const registration = await navigator.serviceWorker.register(swURL);
+            const registration = await navigator.serviceWorker.register('./sw.js');
             this.swRegistration = registration;
             console.log('[PWA] ✅ Service Worker تم تسجيله');
+
+            // إشعار المستخدم عند توفر نسخة جديدة من التطبيق مخزّنة وجاهزة
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                if (!newWorker) return;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        this.showUpdateNotification();
+                    }
+                });
+            });
+
             return true;
         } catch (error) {
             console.error('[PWA] ❌ فشل التسجيل:', error);
@@ -6657,14 +7123,6 @@ window.PerformanceOptimizer = PerformanceOptimizer;
     <script>
         // ========== إخفاء شاشة البداية بعد تحميل التطبيق ==========
         document.addEventListener('DOMContentLoaded', function() {
-            // زر المساعدة
-            const helpBtn = document.getElementById('helpBtn');
-            if (helpBtn) {
-                helpBtn.addEventListener('click', function() {
-                    window.location.href = './help.html';
-                });
-            }
-            
             // تحديث آخر تحديث من localStorage
             const lastUpdate = localStorage.getItem('herbal_last_update');
             if (lastUpdate) {
@@ -6695,6 +7153,82 @@ window.PerformanceOptimizer = PerformanceOptimizer;
                 }
             }, 2000);
         });
+    </script>
+
+    <!-- منطق فتح/إغلاق القائمة الجانبية الموحّدة (البحث + كل الأدوات) -->
+    <script>
+        (function() {
+            const menuBtn = document.getElementById('menuToggleBtn');
+            const closeBtn = document.getElementById('sideMenuCloseBtn');
+            const overlay = document.getElementById('sideMenuOverlay');
+            const menu = document.getElementById('sideMenu');
+            const searchInput = document.getElementById('wideSearchInput');
+            if (!menuBtn || !menu || !overlay) return;
+
+            function openMenu() {
+                menu.classList.add('open');
+                overlay.classList.add('open');
+                menu.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMenu() {
+                menu.classList.remove('open');
+                overlay.classList.remove('open');
+                menu.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            menuBtn.addEventListener('click', function() {
+                if (menu.classList.contains('open')) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+
+            if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+            overlay.addEventListener('click', closeMenu);
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && menu.classList.contains('open')) closeMenu();
+            });
+
+            // إغلاق القائمة تلقائيًا عند الضغط على أي زر إجراء داخلها (باستثناء حقل البحث)
+            menu.addEventListener('click', function(e) {
+                if (e.target.closest('#wideSearchInput, #clearSearchBtn, .theme-switch, .view-toggle')) return;
+                const actionEl = e.target.closest('button, .icon-btn, .tool-btn, .visitor-btn');
+                if (actionEl && actionEl !== closeBtn) {
+                    setTimeout(closeMenu, 150);
+                }
+            });
+        })();
+
+        // مزامنة مساحة الهيدر: الهيدر أصبح position:fixed (ثابت تمامًا ولا
+        // يتحرك مع التمرير)، لذا يجب حساب ارتفاعه الفعلي (يتغير حسب حجم
+        // الشاشة ولف النص) وتمريره كمتغير CSS ليعرف بقية المحتوى أين يبدأ.
+        (function() {
+            const header = document.querySelector('.header');
+            const root = document.documentElement;
+            if (!header) return;
+
+            function syncHeaderOffset() {
+                const rect = header.getBoundingClientRect();
+                const offset = Math.ceil(rect.bottom + 16);
+                root.style.setProperty('--header-offset', offset + 'px');
+            }
+
+            syncHeaderOffset();
+            window.addEventListener('load', syncHeaderOffset);
+            window.addEventListener('resize', syncHeaderOffset);
+            window.addEventListener('orientationchange', syncHeaderOffset);
+
+            if (window.ResizeObserver) {
+                new ResizeObserver(syncHeaderOffset).observe(header);
+            } else {
+                setInterval(syncHeaderOffset, 500);
+            }
+        })();
     </script>
 </body>
 </html>
