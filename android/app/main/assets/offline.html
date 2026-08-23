@@ -229,7 +229,7 @@
             
             try {
                 // محاولة قراءة الكاش من localStorage
-                const cacheData = localStorage.getItem('herbal_cache_v2');
+                const cacheData = localStorage.getItem('herbal_cache_v3');
                 if (cacheData) {
                     const data = JSON.parse(cacheData);
                     const herbsCount = data.herbs?.length || 0;
@@ -283,9 +283,9 @@
             // استخدام المسار النسبي ليتوافق مع هيكل المشروع
             if (window.matchMedia('(display-mode: standalone)').matches) {
                 // إذا كان التطبيق مثبتاً
-                window.location.href = './';
+                window.location.href = './index.html';
             } else {
-                window.location.href = './';
+                window.location.href = './index.html';
             }
         }
         
@@ -301,7 +301,7 @@
                 cachedDiv.style.background = 'rgba(76,175,80,0.3)';
             }
             setTimeout(() => {
-                window.location.href = './';
+                window.location.href = './index.html';
             }, 1500);
         });
         

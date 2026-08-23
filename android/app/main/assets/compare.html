@@ -1748,7 +1748,7 @@ console.log('👑 Admin UID:', ADMIN_UID);
                 `;
                 const backHomeBtn = document.getElementById('backHomeBtn');
                 if (backHomeBtn) {
-                    backHomeBtn.addEventListener('click', () => window.location.href = './');
+                    backHomeBtn.addEventListener('click', () => window.location.href = './index.html');
                 }
             }
         }
@@ -1771,7 +1771,7 @@ console.log('👑 Admin UID:', ADMIN_UID);
                 `;
                 const goToAppBtn = document.getElementById('goToAppBtn');
                 if (goToAppBtn) {
-                    goToAppBtn.addEventListener('click', () => window.location.href = './');
+                    goToAppBtn.addEventListener('click', () => window.location.href = './index.html');
                 }
                 return;
             }
@@ -1789,7 +1789,7 @@ console.log('👑 Admin UID:', ADMIN_UID);
                 `;
                 const goToAppBtn = document.getElementById('goToAppBtn');
                 if (goToAppBtn) {
-                    goToAppBtn.addEventListener('click', () => window.location.href = './');
+                    goToAppBtn.addEventListener('click', () => window.location.href = './index.html');
                 }
                 return;
             }
@@ -1874,7 +1874,7 @@ console.log('👑 Admin UID:', ADMIN_UID);
             container.innerHTML = html;
 
             // ربط الأحداث
-            document.getElementById('addMoreBtn')?.addEventListener('click', () => window.location.href = './');
+            document.getElementById('addMoreBtn')?.addEventListener('click', () => window.location.href = './index.html');
             document.getElementById('printTableBtn')?.addEventListener('click', () => printCompareTable(compareList));
             document.getElementById('clearTableBtn')?.addEventListener('click', () => {
                 if (confirm('⚠️ هل تريد مسح جميع الأعشاب من قائمة المقارنة؟')) {
@@ -1956,7 +1956,7 @@ console.log('👑 Admin UID:', ADMIN_UID);
         }
 
         // ربط الأزرار
-        document.getElementById('backToAppBtn')?.addEventListener('click', () => window.location.href = './');
+        document.getElementById('backToAppBtn')?.addEventListener('click', () => window.location.href = './index.html');
         document.getElementById('printCompareBtn')?.addEventListener('click', () => {
             const compareList = JSON.parse(localStorage.getItem('herbal_compare_list') || '[]');
             if (compareList.length >= 2) {

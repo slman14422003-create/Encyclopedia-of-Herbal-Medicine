@@ -5196,7 +5196,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const compareBtn = document.getElementById('compareBtn');
     if (compareBtn) {
         compareBtn.addEventListener('click', () => {
-            window.location.href = './compare.html';
+            CompareSystem.show();
         });
     }
 
@@ -5617,7 +5617,9 @@ function showFullHerbDetail(id) {
         </div>
     `;
 
-    // إنشاء المودال مع زر الإغلاق في الأعلى
+    // إنشاء المودال مع زر الإغلاق في الأعلى (نحذف أي نسخة قديمة أولاً لمنع
+    // تراكم عناصر مكررة بنفس الـ id في الصفحة مع كل عشبة يتم فتحها)
+    document.querySelectorAll('#herbDetailModal').forEach(m => m.remove());
     const modal = document.createElement('div');
     modal.className = 'modal-glass active';
     modal.id = 'herbDetailModal';
@@ -7152,6 +7154,25 @@ window.PerformanceOptimizer = PerformanceOptimizer;
                     }, 300);
                 }
             }, 2000);
+        });
+    </script>
+
+    <!-- إغلاق موحّد لكل النوافذ المنبثقة (modal-glass): بالنقر على الخلفية
+         خارج محتوى النافذة، أو بمفتاح Escape - كانت تُغلق سابقًا فقط عبر
+         زر (X) الصريح داخل كل نافذة -->
+    <script>
+        document.addEventListener('click', function(e) {
+            if (e.target.classList && e.target.classList.contains('modal-glass') && e.target.classList.contains('active')) {
+                e.target.classList.remove('active');
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key !== 'Escape') return;
+            const openModals = document.querySelectorAll('.modal-glass.active');
+            if (openModals.length) {
+                openModals[openModals.length - 1].classList.remove('active');
+            }
         });
     </script>
 

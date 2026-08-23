@@ -1,9 +1,11 @@
 // =====================================================
 // Service Worker متقدم - تطبيق Android نظامي
-// الإصدار 7.0 - تخزين دائم ومزامنة ذكية
+// الإصدار 9.0 - نسخة واحدة موحّدة (لا يوجد Service Worker مكرر يُسجَّل
+// عبر Blob من داخل index.html بعد الآن)، مع تخزين دائم وقشرة تطبيق
+// (App Shell) تُعرض دائمًا حتى بدون اتصال، بدل الانتقال لصفحة منفصلة.
 // =====================================================
 
-const CACHE_VERSION = 'v7';
+const CACHE_VERSION = 'v9';
 const CACHE_NAME = `herbal-pwa-${CACHE_VERSION}`;
 const STATIC_CACHE = `herbal-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `herbal-dynamic-${CACHE_VERSION}`;
@@ -14,16 +16,16 @@ const OFFLINE_CACHE = `herbal-offline-${CACHE_VERSION}`;
 // فترة فحص التحديثات (كل 24 ساعة)
 const UPDATE_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
 
-// الأصول الثابتة
+// قشرة التطبيق (App Shell): كل شيء تقريبًا مدمج داخل index.html نفسه
+// (بما في ذلك المساعدة، التي أصبحت مودال داخلي بدل صفحة help.html منفصلة)،
+// لذا لا حاجة لتخزين صفحات منفصلة لها. offline.html يبقى فقط كخط دفاع أخير
+// نادر الاستخدام إن لم تتوفر أي نسخة مخزّنة من التطبيق إطلاقًا.
+const APP_SHELL = './index.html';
 const STATIC_ASSETS = [
-  '.',
   './',
-  './index.html',
+  APP_SHELL,
   './manifest.json',
   './offline.html',
-  './compare.html',
-  './help.html',
-  './privacy.html',
   'https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
   'https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js',
@@ -31,7 +33,8 @@ const STATIC_ASSETS = [
   'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js'
 ];
 
-// صفحة عدم الاتصال
+// صفحة عدم الاتصال الاحتياطية (تُستخدم فقط إن تعذّر إيجاد أي نسخة مخزّنة
+// من التطبيق نفسه على الإطلاق - حالة نادرة جدًا في أول تشغيل بدون اتصال)
 const OFFLINE_PAGE = `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -57,15 +60,9 @@ const OFFLINE_PAGE = `<!DOCTYPE html>
     <div class="container">
         <div class="icon">🌿</div>
         <h1>⚠️ غير متصل بالإنترنت</h1>
-        <p>يبدو أنك غير متصل بالإنترنت.<br>البيانات المتاحة حالياً هي آخر نسخة محفوظة.</p>
+        <p>يبدو أنك غير متصل بالإنترنت ولم يتم تحميل التطبيق بعد على هذا الجهاز.<br>يرجى الاتصال بالإنترنت مرة واحدة على الأقل لتحميل التطبيق.</p>
         <button class="btn" onclick="location.reload()">🔄 إعادة المحاولة</button>
-        <div class="features">
-            <span class="feature">📚 بيانات محفوظة</span>
-            <span class="feature">🔍 بحث محلي</span>
-            <span class="feature">⭐ إشارات مرجعية</span>
-            <span class="feature">📝 ملاحظات</span>
-        </div>
-        <div class="version">موسوعة الأعشاب الطبية - الإصدار 7.0</div>
+        <div class="version">موسوعة الأعشاب الطبية - الإصدار 9.0</div>
     </div>
 </body>
 </html>`;
@@ -87,8 +84,8 @@ self.addEventListener('activate', event => {
       const keys = await caches.keys();
       await Promise.all(
         keys.map(key => {
-          if (key !== STATIC_CACHE && key !== DYNAMIC_CACHE && 
-              key !== IMAGE_CACHE && key !== DATA_CACHE && 
+          if (key !== STATIC_CACHE && key !== DYNAMIC_CACHE &&
+              key !== IMAGE_CACHE && key !== DATA_CACHE &&
               key !== OFFLINE_CACHE && key !== CACHE_NAME) {
             console.log('[SW] حذف الكاش القديم:', key);
             return caches.delete(key);
@@ -100,12 +97,24 @@ self.addEventListener('activate', event => {
   );
 });
 
-// ========== استراتيجيات التخزين المتقدمة ==========
+// هل هذا الطلب هو أحد الأصول الثابتة المُعرَّفة صراحة؟ (مطابقة دقيقة على
+// المسار، وليس على أي جزء من الرابط - المطابقة القديمة بـ includes('.')
+// كانت تُطابق كل رابط تقريبًا وتحوّله بالخطأ إلى استراتيجية Cache First،
+// وهو ما كان يسبب تقديم نسخة قديمة مخزّنة من الصفحة دون تحديثها).
+function isStaticAsset(url) {
+  return STATIC_ASSETS.some(asset => {
+    if (asset.startsWith('http')) return url.href === asset;
+    try {
+      return url.pathname === new URL(asset, self.registration.scope).pathname;
+    } catch (e) {
+      return false;
+    }
+  });
+}
 
-// طلبات Firebase - Network First مع تخزين مؤقت
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  
+
   // بيانات Firebase - تخزين مؤقت للاستخدام دون اتصال
   if (url.hostname.includes('firebase') || url.hostname.includes('firestore')) {
     event.respondWith(
@@ -118,9 +127,9 @@ self.addEventListener('fetch', event => {
       }).catch(async () => {
         const cached = await caches.match(event.request.url);
         if (cached) return cached;
-        return new Response(JSON.stringify({ 
-          error: 'offline', 
-          message: 'غير متصل بالإنترنت، يتم عرض البيانات المخزنة' 
+        return new Response(JSON.stringify({
+          error: 'offline',
+          message: 'غير متصل بالإنترنت، يتم عرض البيانات المخزنة'
         }), {
           status: 503,
           headers: { 'Content-Type': 'application/json' }
@@ -129,10 +138,46 @@ self.addEventListener('fetch', event => {
     );
     return;
   }
-  
-  // الأصول الثابتة - Cache First
-  if (STATIC_ASSETS.some(asset => url.href.includes(asset)) || 
-      url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+
+  // طلبات التنقّل (فتح/إعادة فتح التطبيق) - قشرة التطبيق (App Shell):
+  // تُعرض النسخة المخزّنة من index.html فورًا (تعمل بدون اتصال دائمًا)،
+  // وفي الخلفية يتم تحديثها من الشبكة إن كان الاتصال متوفرًا. هذا يضمن
+  // أن رجوع المستخدم للتطبيق (زر الرجوع، فتح التطبيق من الشاشة الرئيسية،
+  // إلخ) يعرض التطبيق نفسه دائمًا، وليس شاشة "لا يوجد اتصال" منفصلة.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      (async () => {
+        const cache = await caches.open(STATIC_CACHE);
+        const cachedShell = await cache.match(APP_SHELL);
+
+        const networkUpdate = fetch(event.request).then(response => {
+          if (response && response.status === 200) {
+            cache.put(APP_SHELL, response.clone());
+          }
+          return response;
+        }).catch(() => null);
+
+        if (cachedShell) {
+          // لا ننتظر الشبكة: نعرض النسخة المخزّنة فورًا، والتحديث يحدث بصمت
+          event.waitUntil(networkUpdate);
+          return cachedShell;
+        }
+
+        // لا توجد نسخة مخزّنة بعد (أول تشغيل) - ننتظر الشبكة، وإن تعذّرت
+        // نعرض صفحة عدم الاتصال الاحتياطية فقط في هذه الحالة النادرة
+        const networkResponse = await networkUpdate;
+        if (networkResponse) return networkResponse;
+        return (await caches.match('./offline.html')) || new Response(OFFLINE_PAGE, {
+          headers: { 'Content-Type': 'text/html' }
+        });
+      })()
+    );
+    return;
+  }
+
+  // الأصول الثابتة المُعرَّفة صراحة (index.html كمورد غير-navigate، الخطوط،
+  // المانفست...) - Cache First
+  if (isStaticAsset(url)) {
     event.respondWith(
       caches.match(event.request).then(cached => {
         if (cached) return cached;
@@ -145,7 +190,7 @@ self.addEventListener('fetch', event => {
     );
     return;
   }
-  
+
   // الصور - Stale-While-Revalidate
   if (url.pathname.match(/\.(png|jpg|jpeg|gif|webp|svg|ico)/i)) {
     event.respondWith(
@@ -162,8 +207,8 @@ self.addEventListener('fetch', event => {
     );
     return;
   }
-  
-  // باقي الطلبات - Network First
+
+  // باقي الطلبات (JS/CSS خارجية، إلخ) - Network First مع نسخة مخزّنة كبديل
   event.respondWith(
     fetch(event.request).then(response => {
       const clone = response.clone();
@@ -172,11 +217,6 @@ self.addEventListener('fetch', event => {
     }).catch(async () => {
       const cached = await caches.match(event.request);
       if (cached) return cached;
-      if (event.request.mode === 'navigate') {
-        return caches.match('./offline.html') || new Response(OFFLINE_PAGE, {
-          headers: { 'Content-Type': 'text/html' }
-        });
-      }
       return new Response('غير متصل', { status: 503 });
     })
   );
@@ -185,7 +225,7 @@ self.addEventListener('fetch', event => {
 // ========== مزامنة الخلفية ==========
 self.addEventListener('sync', event => {
   console.log('[SW] مزامنة خلفية:', event.tag);
-  
+
   if (event.tag === 'sync-herbs') {
     event.waitUntil(
       (async () => {
@@ -194,7 +234,7 @@ self.addEventListener('sync', event => {
           clients.forEach(client => {
             client.postMessage({ type: 'SYNC_STARTED' });
           });
-          
+
           // محاولة المزامنة مع Firebase
           const syncData = await caches.match('/sync-data');
           if (syncData) {
@@ -206,7 +246,7 @@ self.addEventListener('sync', event => {
             });
             await caches.delete('/sync-data');
           }
-          
+
           clients.forEach(client => {
             client.postMessage({ type: 'SYNC_COMPLETED' });
           });
@@ -228,7 +268,7 @@ self.addEventListener('push', event => {
     vibrate: [200, 100, 200],
     tag: 'herbal-update'
   };
-  
+
   if (event.data) {
     try {
       const parsed = event.data.json();
@@ -237,7 +277,7 @@ self.addEventListener('push', event => {
       data.body = event.data.text();
     }
   }
-  
+
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
@@ -264,12 +304,12 @@ self.addEventListener('notificationclick', event => {
 // ========== معالجة الرسائل من التطبيق ==========
 self.addEventListener('message', event => {
   const { type, data } = event.data || {};
-  
+
   switch (type) {
     case 'SKIP_WAITING':
       self.skipWaiting();
       break;
-      
+
     case 'CLEAR_CACHE':
       event.waitUntil(
         (async () => {
@@ -281,7 +321,7 @@ self.addEventListener('message', event => {
         })()
       );
       break;
-      
+
     case 'GET_CACHE_SIZE':
       event.waitUntil(
         (async () => {
@@ -298,7 +338,7 @@ self.addEventListener('message', event => {
         })()
       );
       break;
-      
+
     case 'CACHE_DATA':
       if (data && data.url && data.content) {
         event.waitUntil(
