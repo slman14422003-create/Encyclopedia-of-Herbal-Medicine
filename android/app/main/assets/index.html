@@ -121,6 +121,21 @@
     --md-font-headline-small: 20px;
     --md-font-headline-medium: 24px;
     --md-font-headline-large: 28px;
+
+    /* ========== One UI 8.5 / Liquid Glass ========== */
+    --oneui-radius: 26px;
+    --oneui-radius-lg: 32px;
+    --oneui-radius-xl: 36px;
+    --bottom-nav-space: 78px;
+
+    --liquid-blur: 26px;
+    --liquid-saturate: 180%;
+    --liquid-bg: color-mix(in srgb, var(--md-surface) 62%, transparent);
+    --liquid-bg-strong: color-mix(in srgb, var(--md-surface) 82%, transparent);
+    --liquid-border: color-mix(in srgb, #ffffff 55%, transparent);
+    --liquid-shine: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0) 45%);
+    --liquid-shadow: 0 10px 32px rgba(20, 40, 20, 0.14), 0 1px 0 rgba(255,255,255,0.5) inset;
+    --liquid-highlight-ring: inset 0 1px 1px rgba(255,255,255,.6), inset 0 -1px 1px rgba(0,0,0,.04);
 }
 
 /* ========== الوضع الداكن المتكامل ========== */
@@ -155,6 +170,14 @@ body.dark-mode {
     --md-shadow-md: 0 2px 6px rgba(0, 0, 0, 0.25);
     --md-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.3);
     --md-shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+    /* ========== Liquid Glass - الوضع الليلي ========== */
+    --liquid-bg: color-mix(in srgb, var(--md-surface) 55%, transparent);
+    --liquid-bg-strong: color-mix(in srgb, var(--md-surface) 76%, transparent);
+    --liquid-border: color-mix(in srgb, #ffffff 14%, transparent);
+    --liquid-shine: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0) 45%);
+    --liquid-shadow: 0 10px 32px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255,255,255,0.07) inset;
+    --liquid-highlight-ring: inset 0 1px 1px rgba(255,255,255,.12), inset 0 -1px 1px rgba(0,0,0,.25);
 }
 
 /* ========== الإعدادات الأساسية ========== */
@@ -230,61 +253,166 @@ body {
        يشغلها بمقدار ديناميكي يُحسب فعلياً بجافاسكربت (متغير --header-offset)
        حتى لا يتداخل مع بداية شريط الأدوات مهما تغير ارتفاع الهيدر. */
     padding-top: var(--header-offset, 104px);
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-space, 78px) + 24px);
     min-height: 100vh;
     min-height: 100dvh;
 }
 
-/* ========== الهيدر المتقدم (شريط علوي ثابت فعلياً وملتصق بأعلى الشاشة،
-   بعرض كامل بدل شكل البطاقة العائمة في المنتصف) ========== */
+/* ========== Liquid Glass — الطابع الزجاجي السائل (One UI 8.5) ==========
+   كلاس عام قابل لإعادة الاستخدام: خلفية زجاجية ضبابية + لمعة علوية +
+   حافة مضيئة رفيعة تحاكي انكسار الضوء على سطح زجاجي سائل. */
+.liquid-glass {
+    position: relative;
+    background: var(--liquid-bg);
+    backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate));
+    -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate));
+    border: 1px solid var(--liquid-border);
+    box-shadow: var(--liquid-shadow);
+    isolation: isolate;
+}
+
+.liquid-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    height: 55%;
+    background: var(--liquid-shine);
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 0;
+    opacity: .8;
+}
+
+.liquid-glass::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: var(--liquid-highlight-ring);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.liquid-glass > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ========== الهيدر (شريط علوي عائم بطابع Liquid Glass — One UI 8.5) ========== */
 .header {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    left: var(--md-space-3);
+    right: var(--md-space-3);
     z-index: 500;
-    background: color-mix(in srgb, var(--md-surface) 96%, transparent);
-    backdrop-filter: blur(16px) saturate(160%);
-    -webkit-backdrop-filter: blur(16px) saturate(160%);
-    border-radius: 0;
-    padding: calc(env(safe-area-inset-top, 0px) + var(--md-space-3)) var(--md-space-5) var(--md-space-3);
+    border-radius: var(--oneui-radius-lg);
+    padding: 9px 10px 9px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: var(--md-space-3);
-    box-shadow: var(--md-shadow);
-    border: none;
-    border-bottom: 1px solid var(--md-outline-variant);
-    transition: box-shadow var(--md-motion-duration-medium) var(--md-motion-easing);
+    transition: box-shadow var(--md-motion-duration-medium) var(--md-motion-easing), transform var(--md-motion-duration-medium) var(--md-motion-easing);
 }
 
-.header:hover {
-    box-shadow: var(--md-shadow-md);
+.header:active {
+    transform: scale(0.997);
 }
 
-/* زر فتح القائمة الجانبية (الهامبرغر) - العنصر الوحيد إلى جانب الشعار في الهيدر */
-.menu-toggle-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--md-radius-full);
-    background: var(--md-surface-dim);
-    border: 1px solid var(--md-outline-variant);
-    color: var(--md-on-surface-variant);
+/* الجزء الأيمن أقصى (RTL): زر القائمة + زر البحث السريع */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-2);
+    flex-shrink: 0;
+}
+
+/* زر فتح القائمة الجانبية (الهامبرغر) - في أقصى يمين الشريط العلوي */
+.menu-toggle-btn,
+.header-quick-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--oneui-radius);
+    background: var(--md-primary-container);
+    border: 1px solid var(--liquid-border);
+    color: var(--md-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 17px;
     cursor: pointer;
     flex-shrink: 0;
     transition: all var(--md-motion-duration-short) var(--md-motion-easing);
 }
 
-.menu-toggle-btn:active {
-    transform: scale(0.94);
+.menu-toggle-btn:active,
+.header-quick-btn:active {
+    transform: scale(0.9);
     background: var(--md-primary);
     border-color: var(--md-primary);
     color: var(--md-on-primary);
+}
+
+/* ========== الشريط السفلي (Bottom Nav) — 3 خيارات رئيسية بطابع Liquid Glass ========== */
+.bottom-nav {
+    position: fixed;
+    left: var(--md-space-4);
+    right: var(--md-space-4);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+    z-index: 900;
+    max-width: 460px;
+    margin-inline: auto;
+    border-radius: var(--oneui-radius-lg);
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    padding: 6px;
+    gap: 4px;
+}
+
+.bottom-nav-item {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 9px 6px 8px;
+    border: none;
+    background: transparent;
+    border-radius: calc(var(--oneui-radius-lg) - 8px);
+    color: var(--md-on-surface-variant);
+    cursor: pointer;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--md-motion-duration-medium) var(--md-motion-easing),
+                background var(--md-motion-duration-medium) var(--md-motion-easing),
+                transform var(--md-motion-duration-short) var(--md-motion-easing);
+}
+
+.bottom-nav-item i {
+    font-size: 19px;
+    transition: transform var(--md-motion-duration-long) var(--md-motion-easing-emphasized);
+}
+
+.bottom-nav-item span {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.bottom-nav-item.active {
+    color: var(--md-primary);
+    background: var(--md-primary-container);
+}
+
+.bottom-nav-item.active i {
+    transform: translateY(-1px) scale(1.1);
+}
+
+.bottom-nav-item:active {
+    transform: scale(0.92);
 }
 
 /* ========== القائمة الجانبية الموحّدة (تجمع البحث وكل الأدوات) ========== */
@@ -310,15 +438,21 @@ body {
     left: 0;
     width: 320px;
     max-width: 86vw;
-    background: var(--md-surface);
+    background: var(--liquid-bg-strong);
+    backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate));
+    -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate));
+    border-radius: 0 var(--oneui-radius-xl) var(--oneui-radius-xl) 0;
     z-index: 1600;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--liquid-shadow), 0 0 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--liquid-border);
+    border-left: none;
     transform: translateX(-100%);
     transition: transform var(--md-motion-duration-long) var(--md-motion-easing-emphasized);
     display: flex;
     flex-direction: column;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
+    overflow: hidden;
 }
 
 .side-menu.open {
@@ -434,37 +568,49 @@ body {
 .logo-area {
     display: flex;
     align-items: center;
-    gap: var(--md-space-3);
+    gap: var(--md-space-2);
+    min-width: 0;
 }
 
 .logo-icon {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     background: linear-gradient(135deg, var(--md-primary), var(--md-primary-dark));
-    border-radius: var(--md-radius-lg);
+    border-radius: var(--oneui-radius);
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 12px var(--md-primary-container);
+    flex-shrink: 0;
 }
 
 .logo-icon i {
-    font-size: 24px;
+    font-size: 19px;
     color: var(--md-on-primary);
 }
 
+.logo-text {
+    min-width: 0;
+}
+
 .logo-text h1 {
-    font-size: var(--md-font-title-large);
-    font-weight: 700;
+    font-size: var(--md-font-title-medium);
+    font-weight: 800;
     background: linear-gradient(135deg, var(--md-primary), var(--md-primary-dark));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .logo-text p {
     font-size: var(--md-font-label-small);
     color: var(--md-on-surface-variant);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* أزرار الهيدر */
@@ -618,7 +764,7 @@ body {
 .fab-search-btn {
     position: fixed;
     inset-inline-end: var(--md-space-5);
-    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--md-space-5));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-space, 78px) + var(--md-space-4));
     width: 58px;
     height: 58px;
     border-radius: 50%;
@@ -648,7 +794,7 @@ body {
 .fab-search-panel {
     position: fixed;
     inset-inline: var(--md-space-4);
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-space, 78px) + 66px);
     max-width: 480px;
     margin-inline: auto;
     background: var(--md-surface);
@@ -925,6 +1071,233 @@ body.viewer-mode .visitor-only {
     display: none;
 }
 
+/* ========== لوحة الرئيسية (Home Dashboard) ========== */
+.home-hero {
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-4);
+    border-radius: var(--oneui-radius-xl);
+    padding: var(--md-space-5);
+    margin-bottom: var(--md-space-5);
+}
+
+.home-hero-icon {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: var(--oneui-radius);
+    background: linear-gradient(135deg, var(--md-primary), var(--md-primary-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px var(--md-primary-container);
+}
+
+.home-hero-icon i {
+    font-size: 26px;
+    color: var(--md-on-primary);
+}
+
+.home-hero-greeting {
+    font-size: var(--md-font-label-medium);
+    font-weight: 700;
+    color: var(--md-primary);
+    margin-bottom: 2px;
+}
+
+.home-hero-text h2 {
+    font-size: var(--md-font-title-large);
+    font-weight: 800;
+    margin-bottom: 4px;
+    color: var(--md-on-surface);
+}
+
+.home-hero-text p {
+    font-size: var(--md-font-body-small);
+    color: var(--md-on-surface-variant);
+    line-height: 1.5;
+}
+
+.home-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--md-space-3);
+    margin-bottom: var(--md-space-5);
+}
+
+.home-stat-card {
+    border-radius: var(--oneui-radius);
+    padding: var(--md-space-4) var(--md-space-2);
+    text-align: center;
+}
+
+.home-stat-card i {
+    font-size: 17px;
+    color: var(--md-primary);
+    margin-bottom: 6px;
+}
+
+.home-stat-value {
+    font-size: var(--md-font-headline-small);
+    font-weight: 800;
+    color: var(--md-on-surface);
+    line-height: 1.2;
+}
+
+.home-stat-label {
+    font-size: var(--md-font-label-small);
+    color: var(--md-on-surface-variant);
+    margin-top: 2px;
+}
+
+.home-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--md-space-3);
+    margin-bottom: var(--md-space-6);
+}
+
+.home-action-btn {
+    border: none;
+    border-radius: var(--oneui-radius);
+    padding: var(--md-space-4) var(--md-space-2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--md-on-surface);
+    transition: transform var(--md-motion-duration-short) var(--md-motion-easing);
+}
+
+.home-action-btn i {
+    font-size: 18px;
+    color: var(--md-primary);
+}
+
+.home-action-btn span {
+    font-size: var(--md-font-label-small);
+    font-weight: 700;
+}
+
+.home-action-btn:active {
+    transform: scale(0.95);
+}
+
+.home-section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-2);
+    font-size: var(--md-font-title-small);
+    font-weight: 800;
+    color: var(--md-on-surface);
+    margin-bottom: var(--md-space-3);
+}
+
+.home-section-title i {
+    color: var(--md-primary);
+}
+
+.home-chip-row {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: var(--md-space-2);
+    padding-bottom: var(--md-space-2);
+    margin-bottom: var(--md-space-6);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.home-chip-row::-webkit-scrollbar {
+    display: none;
+}
+
+.home-chip {
+    flex-shrink: 0;
+    border: none;
+    border-radius: var(--md-radius-full);
+    padding: 9px 16px;
+    font-size: var(--md-font-label-medium);
+    font-weight: 700;
+    color: var(--md-on-surface);
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: transform var(--md-motion-duration-short) var(--md-motion-easing);
+}
+
+.home-chip i {
+    color: var(--md-primary);
+    margin-left: 4px;
+}
+
+.home-chip:active {
+    transform: scale(0.94);
+}
+
+.home-featured-scroll {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: var(--md-space-3);
+    padding-bottom: var(--md-space-3);
+    margin-bottom: var(--md-space-4);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.home-featured-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.home-featured-card {
+    flex-shrink: 0;
+    width: 128px;
+    border-radius: var(--oneui-radius);
+    overflow: hidden;
+    cursor: pointer;
+    padding-bottom: var(--md-space-2);
+    transition: transform var(--md-motion-duration-short) var(--md-motion-easing);
+}
+
+.home-featured-card:active {
+    transform: scale(0.95);
+}
+
+.home-featured-card img,
+.home-featured-fallback {
+    width: 100%;
+    height: 96px;
+    object-fit: cover;
+    display: block;
+}
+
+.home-featured-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--md-primary-container);
+    color: var(--md-primary);
+    font-size: 24px;
+}
+
+.home-featured-name {
+    font-size: var(--md-font-label-small);
+    font-weight: 700;
+    text-align: center;
+    padding: 8px 6px 2px;
+    color: var(--md-on-surface);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 420px) {
+    .home-hero { flex-direction: column; text-align: center; }
+}
+
 /* ========== بطاقات الأعشاب المتقدمة ========== */
 .herbs-grid, .categories-grid {
     display: grid;
@@ -1092,8 +1465,10 @@ body.viewer-mode .visitor-only {
 }
 
 .modal-glass-content {
-    background: var(--md-surface);
-    border-radius: var(--md-radius-2xl);
+    background: var(--liquid-bg-strong);
+    backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate));
+    -webkit-backdrop-filter: blur(var(--liquid-blur)) saturate(var(--liquid-saturate));
+    border-radius: var(--oneui-radius-xl);
     width: 90%;
     max-width: 580px;
     max-height: 85vh;
@@ -1103,8 +1478,8 @@ body.viewer-mode .visitor-only {
     overscroll-behavior: contain;
     padding: var(--md-space-6);
     padding-bottom: calc(var(--md-space-6) + env(safe-area-inset-bottom));
-    box-shadow: var(--md-shadow-2xl);
-    border: 1px solid var(--md-outline-variant);
+    box-shadow: var(--liquid-shadow), var(--md-shadow-2xl);
+    border: 1px solid var(--liquid-border);
     transform: scale(0.95);
     transition: transform var(--md-motion-duration-medium);
 }
@@ -1606,7 +1981,7 @@ body.viewer-mode .visitor-only {
     .app-container {
         padding: var(--md-space-3);
         padding-top: var(--header-offset, 104px);
-        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-space, 78px) + 24px);
     }
     
     .herbs-grid, .categories-grid {
@@ -1625,13 +2000,13 @@ body.viewer-mode .visitor-only {
     }
     
     .header {
-        padding: var(--md-space-3);
-        flex-direction: column;
-        text-align: center;
+        padding: 8px 8px 8px 14px;
+        flex-direction: row;
+        text-align: right;
     }
     
     .logo-area {
-        justify-content: center;
+        justify-content: flex-start;
     }
     
     .search-bar-wrapper {
@@ -1854,8 +2229,13 @@ body.font-xlarge {
     <!-- ========== التطبيق الرئيسي ========== -->
     <div id="mainApp" style="display: none;">
         <div class="app-container">
-            <!-- الهيدر: شعار + زر قائمة واحد فقط (كل شيء آخر داخل القائمة الجانبية) -->
-            <div class="header">
+            <!-- الهيدر: زر القائمة في أقصى اليمين + الشعار — بطابع Liquid Glass عائم -->
+            <div class="header liquid-glass">
+                <div class="header-actions">
+                    <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="فتح القائمة" title="القائمة">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
                 <div class="logo-area">
                     <div class="logo-icon">
                         <i class="fas fa-leaf"></i>
@@ -1865,13 +2245,26 @@ body.font-xlarge {
                         <p>مزامنة سحابية فورية | تطبيق متقدم</p>
                     </div>
                 </div>
-                <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="فتح القائمة" title="القائمة">
-                    <i class="fas fa-bars"></i>
-                </button>
             </div>
 
             <!-- الطبقة الخلفية للقائمة الجانبية -->
             <div class="side-menu-overlay" id="sideMenuOverlay"></div>
+
+            <!-- الشريط السفلي: 3 خيارات رئيسية (الرئيسية / الأعشاب / التصنيفات) -->
+            <nav class="bottom-nav liquid-glass" id="bottomNav">
+                <button class="bottom-nav-item view-btn active" data-view="home" aria-label="الرئيسية">
+                    <i class="fas fa-house"></i>
+                    <span>الرئيسية</span>
+                </button>
+                <button class="bottom-nav-item view-btn" data-view="all" aria-label="الأعشاب">
+                    <i class="fas fa-leaf"></i>
+                    <span>الأعشاب</span>
+                </button>
+                <button class="bottom-nav-item view-btn" data-view="categories" aria-label="التصنيفات">
+                    <i class="fas fa-folder-tree"></i>
+                    <span>التصنيفات</span>
+                </button>
+            </nav>
 
             <!-- القائمة الجانبية الموحّدة: تجمع البحث وكل الأدوات في مكان واحد -->
             <aside class="side-menu" id="sideMenu" aria-hidden="true">
@@ -1897,13 +2290,9 @@ body.font-xlarge {
                         </div>
                     </div>
 
-                    <!-- طريقة العرض والمظهر -->
+                    <!-- المظهر (التنقل بين الأقسام أصبح عبر الشريط السفلي) -->
                     <div>
-                        <div class="side-menu-section-title">العرض</div>
-                        <div class="view-toggle" id="viewToggle" style="margin-bottom: var(--md-space-3);">
-                            <button data-view="all" class="view-btn active">🌿 جميع الأعشاب</button>
-                            <button data-view="categories" class="view-btn">📂 التصنيفات</button>
-                        </div>
+                        <div class="side-menu-section-title">المظهر</div>
                         <div class="theme-switch" id="themeToggle">
                             <button class="theme-btn sun-btn" id="lightModeBtn"><i class="fas fa-sun"></i></button>
                             <button class="theme-btn moon-btn" id="darkModeBtn"><i class="fas fa-moon"></i></button>
@@ -2543,7 +2932,7 @@ let appState = {
     isAdmin: false,
     categories: [],
     herbs: [],
-    currentView: 'all',
+    currentView: 'home',
     currentEditHerbId: null,
     pendingDeleteId: null,
     pendingDeleteType: null,
@@ -2581,7 +2970,11 @@ function updateHerbCount() {
 }
 
 function renderContent() {
-    if (window.appState.currentView === 'all') {
+    if (window.appState.currentView === 'home') {
+        if (typeof HomeManager !== 'undefined' && HomeManager.renderAll) {
+            HomeManager.renderAll();
+        }
+    } else if (window.appState.currentView === 'all') {
         if (typeof HerbManager !== 'undefined' && HerbManager.renderAll) {
             HerbManager.renderAll();
         }
@@ -2692,7 +3085,7 @@ const Utils = {
         toast.className = 'toast-notification';
         const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
         toast.innerHTML = `
-            <div style="background:var(--card-bg);color:var(--text);padding:12px 20px;border-radius:50px;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:10001;box-shadow:0 4px 15px rgba(0,0,0,0.2);display:flex;align-items:center;gap:10px;border:1px solid var(--separator);backdrop-filter:blur(10px);">
+            <div style="background:var(--card-bg);color:var(--text);padding:12px 20px;border-radius:50px;position:fixed;bottom:104px;left:50%;transform:translateX(-50%);z-index:10001;box-shadow:0 4px 15px rgba(0,0,0,0.2);display:flex;align-items:center;gap:10px;border:1px solid var(--separator);backdrop-filter:blur(10px);">
                 <span>${icons[type] || 'ℹ️'}</span>
                 <span>${msg}</span>
             </div>
@@ -3144,7 +3537,7 @@ const UISystem = {
         const toast = document.createElement('div');
         const bgColor = type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : type === 'warning' ? '#ff9800' : '#2e7d32';
         toast.style.cssText = `
-            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 104px; left: 50%; transform: translateX(-50%);
             background: ${bgColor}; color: white; padding: 12px 24px;
             border-radius: 50px; z-index: 10001; font-size: 14px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: center;
@@ -4441,7 +4834,7 @@ const HerbManager = {
         const toast = document.createElement('div');
         const bgColor = type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : type === 'warning' ? '#ff9800' : '#2e7d32';
         toast.style.cssText = `
-            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 104px; left: 50%; transform: translateX(-50%);
             background: ${bgColor}; color: white; padding: 10px 20px;
             border-radius: 40px; z-index: 10001; font-size: 13px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2); text-align: center;
@@ -4730,7 +5123,7 @@ const CategoryManager = {
     showToast: function(message, type) {
         const toast = document.createElement('div');
         const bgColor = type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2e7d32';
-        toast.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:${bgColor};color:white;padding:12px 24px;border-radius:50px;z-index:10001;font-size:14px;`;
+        toast.style.cssText = `position:fixed;bottom:104px;left:50%;transform:translateX(-50%);background:${bgColor};color:white;padding:12px 24px;border-radius:50px;z-index:10001;font-size:14px;`;
         toast.innerHTML = message;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
@@ -4740,6 +5133,122 @@ const CategoryManager = {
 window.CategoryManager = CategoryManager;
 
 /* === end js/features/categories.js === */
+</script>
+    <script>
+/* === js/features/home.js (لوحة الرئيسية) === */
+const HomeManager = {
+    escapeHtml: function(s) {
+        if (!s) return '—';
+        return String(s).replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    },
+
+    renderAll: function() {
+        const container = document.getElementById('contentArea');
+        if (!container) return;
+        const herbs = window.appState.herbs || [];
+        const categories = window.appState.categories || [];
+        const hour = new Date().getHours();
+        const greeting = hour < 12 ? '☀️ صباح الخير' : (hour < 18 ? '🌤️ مساء الخير' : '🌙 مساء الخير');
+        const bookmarksCount = (window.BookmarkSystem && window.BookmarkSystem.list) ? window.BookmarkSystem.list.length : 0;
+
+        const featured = herbs.slice(0, 10);
+        const topCategories = categories.slice(0, 8);
+
+        let html = `
+            <div class="home-hero liquid-glass">
+                <div class="home-hero-icon"><i class="fas fa-leaf"></i></div>
+                <div class="home-hero-text">
+                    <div class="home-hero-greeting">${greeting}</div>
+                    <h2>موسوعة الأعشاب الطبية</h2>
+                    <p>تصفّح الأعشاب والتصنيفات، أو استخدم البحث السريع لإيجاد ما تحتاجه.</p>
+                </div>
+            </div>
+
+            <div class="home-stats-row">
+                <div class="home-stat-card liquid-glass">
+                    <i class="fas fa-leaf"></i>
+                    <div class="home-stat-value">${herbs.length}</div>
+                    <div class="home-stat-label">عشبة</div>
+                </div>
+                <div class="home-stat-card liquid-glass">
+                    <i class="fas fa-folder"></i>
+                    <div class="home-stat-value">${categories.length}</div>
+                    <div class="home-stat-label">تصنيف</div>
+                </div>
+                <div class="home-stat-card liquid-glass">
+                    <i class="fas fa-bookmark"></i>
+                    <div class="home-stat-value">${bookmarksCount}</div>
+                    <div class="home-stat-label">إشارة</div>
+                </div>
+            </div>
+
+            <div class="home-quick-actions">
+                <button class="home-action-btn liquid-glass" id="homeSearchAction"><i class="fas fa-search"></i><span>بحث متقدم</span></button>
+                <button class="home-action-btn liquid-glass" id="homeBookmarksAction"><i class="fas fa-bookmark"></i><span>إشاراتي</span></button>
+                <button class="home-action-btn liquid-glass" id="homeCompareAction"><i class="fas fa-balance-scale"></i><span>مقارنة</span></button>
+            </div>
+        `;
+
+        if (topCategories.length) {
+            html += `
+                <div class="home-section-title"><i class="fas fa-folder-tree"></i> التصنيفات</div>
+                <div class="home-chip-row">
+                    ${topCategories.map(cat => `
+                        <button class="home-chip liquid-glass" data-cat-id="${cat.id}">
+                            <i class="fas fa-folder"></i> ${this.escapeHtml(cat.name)}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        if (featured.length) {
+            html += `
+                <div class="home-section-title"><i class="fas fa-star"></i> أعشاب مقترحة</div>
+                <div class="home-featured-scroll">
+                    ${featured.map(herb => `
+                        <div class="home-featured-card liquid-glass" data-id="${herb.id}">
+                            ${herb.image_url ? `<img src="${this.escapeHtml(herb.image_url)}" loading="lazy" onerror="this.style.display='none'">` : '<div class="home-featured-fallback"><i class="fas fa-leaf"></i></div>'}
+                            <div class="home-featured-name">${this.escapeHtml(herb.name)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            html += `<div class="empty-state"><i class="fas fa-leaf"></i><p>لا توجد أعشاب بعد</p></div>`;
+        }
+
+        container.innerHTML = html;
+        this.attachEvents();
+    },
+
+    attachEvents: function() {
+        const searchBtn = document.getElementById('homeSearchAction');
+        if (searchBtn) searchBtn.onclick = () => { if (typeof showAdvancedSearchModal === 'function') showAdvancedSearchModal(); };
+
+        const bmBtn = document.getElementById('homeBookmarksAction');
+        if (bmBtn) bmBtn.onclick = () => { if (typeof showBookmarksModal === 'function') showBookmarksModal(); };
+
+        const cmpBtn = document.getElementById('homeCompareAction');
+        if (cmpBtn) cmpBtn.onclick = () => { if (window.CompareSystem) window.CompareSystem.show(); };
+
+        document.querySelectorAll('.home-chip').forEach(chip => {
+            chip.onclick = () => {
+                if (window.CategoryManager) window.CategoryManager.showCategoryHerbs(chip.dataset.catId);
+            };
+        });
+
+        document.querySelectorAll('.home-featured-card').forEach(card => {
+            card.onclick = () => {
+                if (window.HerbManager) window.HerbManager.showDetail(card.dataset.id);
+            };
+        });
+    }
+};
+
+window.HomeManager = HomeManager;
+
+/* === end js/features/home.js === */
 </script>
     <script>
 /* === js/features/firebase-admin.js === */
@@ -5048,17 +5557,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ========== تبديل العرض ==========
-    const viewToggle = document.getElementById('viewToggle');
-    if (viewToggle) {
-        viewToggle.addEventListener('click', (e) => {
-            const btn = e.target.closest('.view-btn');
+    // ========== تبديل العرض عبر الشريط السفلي (الرئيسية / الأعشاب / التصنيفات) ==========
+    const bottomNav = document.getElementById('bottomNav');
+    if (bottomNav) {
+        bottomNav.addEventListener('click', (e) => {
+            const btn = e.target.closest('.bottom-nav-item');
             if (btn && btn.dataset.view) {
                 window.appState.currentView = btn.dataset.view;
                 document.querySelectorAll('.view-btn').forEach(b => {
                     b.classList.toggle('active', b.dataset.view === window.appState.currentView);
                 });
                 if (typeof renderContent === 'function') renderContent();
+                // التمرير لأعلى المحتوى عند تبديل القسم
+                const contentArea = document.getElementById('contentArea');
+                if (contentArea) contentArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     }
@@ -5542,7 +6054,7 @@ function showToastMessage(message, type = 'info') {
     const toast = document.createElement('div');
     const bgColor = type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : type === 'warning' ? '#ff9800' : '#2e7d32';
     toast.style.cssText = `
-        position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+        position: fixed; bottom: 104px; left: 50%; transform: translateX(-50%);
         background: ${bgColor}; color: white; padding: 10px 20px;
         border-radius: 40px; z-index: 10001; font-size: 13px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.2); text-align: center;
@@ -6249,7 +6761,7 @@ function showToastMessage(message, type = 'info') {
     
     toast.style.cssText = `
         position: fixed;
-        bottom: 80px;
+        bottom: 104px;
         left: 50%;
         transform: translateX(-50%);
         background: ${bgColor};
@@ -6496,7 +7008,7 @@ const PWAManager = {
         const toast = document.createElement('div');
         toast.className = 'update-toast';
         toast.innerHTML = `
-            <div style="position:fixed;bottom:20px;left:20px;right:20px;background:var(--primary);color:white;padding:12px 20px;border-radius:60px;z-index:10000;display:flex;justify-content:space-between;align-items:center;">
+            <div style="position:fixed;bottom:104px;left:20px;right:20px;background:var(--primary);color:white;padding:12px 20px;border-radius:60px;z-index:10000;display:flex;justify-content:space-between;align-items:center;">
                 <span>🔄 تحديث جديد متاح!</span>
                 <button onclick="location.reload()" style="background:white;color:var(--primary);border:none;border-radius:30px;padding:5px 15px;cursor:pointer;">تحديث</button>
             </div>
@@ -6576,7 +7088,7 @@ const PWAManager = {
     showToast: function(message, type) {
         const toast = document.createElement('div');
         const bgColor = type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2e7d32';
-        toast.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:${bgColor};color:white;padding:10px 20px;border-radius:40px;z-index:10001;font-size:13px;`;
+        toast.style.cssText = `position:fixed;bottom:104px;left:50%;transform:translateX(-50%);background:${bgColor};color:white;padding:10px 20px;border-radius:40px;z-index:10001;font-size:13px;`;
         toast.innerHTML = message;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
