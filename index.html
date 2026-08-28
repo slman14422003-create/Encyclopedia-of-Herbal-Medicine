@@ -128,8 +128,8 @@
     --oneui-radius-xl: 36px;
     --bottom-nav-space: 78px;
 
-    --liquid-blur: 26px;
-    --liquid-saturate: 180%;
+    --liquid-blur: 14px;
+    --liquid-saturate: 140%;
     --liquid-bg: color-mix(in srgb, var(--md-surface) 62%, transparent);
     --liquid-bg-strong: color-mix(in srgb, var(--md-surface) 82%, transparent);
     --liquid-border: color-mix(in srgb, #ffffff 55%, transparent);
@@ -298,25 +298,29 @@ body {
     z-index: 1;
 }
 
-/* ========== الهيدر (شريط علوي عائم بطابع Liquid Glass — One UI 8.5) ========== */
+/* نسخة خفيفة بدون backdrop-filter — للعناصر الكثيرة المتكررة (بطاقات صغيرة/شرائح)
+   حتى لا يُثقل الجهاز بمعالجة ضبابية متعددة الطبقات في نفس الوقت */
+.glass-lite {
+    position: relative;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--md-surface) 92%, transparent), color-mix(in srgb, var(--md-surface) 78%, transparent));
+    border: 1px solid var(--md-outline-variant);
+    box-shadow: var(--md-shadow-sm);
+}
+
+/* ========== الهيدر (شريط علوي ثابت بعرض كامل بطابع Liquid Glass) ========== */
 .header {
     position: fixed;
-    top: calc(env(safe-area-inset-top, 0px) + 10px);
-    left: var(--md-space-3);
-    right: var(--md-space-3);
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 500;
-    border-radius: var(--oneui-radius-lg);
-    padding: 9px 10px 9px 16px;
+    border-radius: 0 0 var(--oneui-radius) var(--oneui-radius);
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) var(--md-space-4) 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: var(--md-space-3);
-    transition: box-shadow var(--md-motion-duration-medium) var(--md-motion-easing), transform var(--md-motion-duration-medium) var(--md-motion-easing);
-}
-
-.header:active {
-    transform: scale(0.997);
 }
 
 /* الجزء الأيمن أقصى (RTL): زر القائمة + زر البحث السريع */
@@ -2000,7 +2004,7 @@ body.viewer-mode .visitor-only {
     }
     
     .header {
-        padding: 8px 8px 8px 14px;
+        padding: calc(env(safe-area-inset-top, 0px) + 8px) 8px 8px 14px;
         flex-direction: row;
         text-align: right;
     }
@@ -5165,17 +5169,17 @@ const HomeManager = {
             </div>
 
             <div class="home-stats-row">
-                <div class="home-stat-card liquid-glass">
+                <div class="home-stat-card glass-lite">
                     <i class="fas fa-leaf"></i>
                     <div class="home-stat-value">${herbs.length}</div>
                     <div class="home-stat-label">عشبة</div>
                 </div>
-                <div class="home-stat-card liquid-glass">
+                <div class="home-stat-card glass-lite">
                     <i class="fas fa-folder"></i>
                     <div class="home-stat-value">${categories.length}</div>
                     <div class="home-stat-label">تصنيف</div>
                 </div>
-                <div class="home-stat-card liquid-glass">
+                <div class="home-stat-card glass-lite">
                     <i class="fas fa-bookmark"></i>
                     <div class="home-stat-value">${bookmarksCount}</div>
                     <div class="home-stat-label">إشارة</div>
@@ -5183,9 +5187,9 @@ const HomeManager = {
             </div>
 
             <div class="home-quick-actions">
-                <button class="home-action-btn liquid-glass" id="homeSearchAction"><i class="fas fa-search"></i><span>بحث متقدم</span></button>
-                <button class="home-action-btn liquid-glass" id="homeBookmarksAction"><i class="fas fa-bookmark"></i><span>إشاراتي</span></button>
-                <button class="home-action-btn liquid-glass" id="homeCompareAction"><i class="fas fa-balance-scale"></i><span>مقارنة</span></button>
+                <button class="home-action-btn glass-lite" id="homeSearchAction"><i class="fas fa-search"></i><span>بحث متقدم</span></button>
+                <button class="home-action-btn glass-lite" id="homeBookmarksAction"><i class="fas fa-bookmark"></i><span>إشاراتي</span></button>
+                <button class="home-action-btn glass-lite" id="homeCompareAction"><i class="fas fa-balance-scale"></i><span>مقارنة</span></button>
             </div>
         `;
 
@@ -5194,7 +5198,7 @@ const HomeManager = {
                 <div class="home-section-title"><i class="fas fa-folder-tree"></i> التصنيفات</div>
                 <div class="home-chip-row">
                     ${topCategories.map(cat => `
-                        <button class="home-chip liquid-glass" data-cat-id="${cat.id}">
+                        <button class="home-chip glass-lite" data-cat-id="${cat.id}">
                             <i class="fas fa-folder"></i> ${this.escapeHtml(cat.name)}
                         </button>
                     `).join('')}
@@ -5207,7 +5211,7 @@ const HomeManager = {
                 <div class="home-section-title"><i class="fas fa-star"></i> أعشاب مقترحة</div>
                 <div class="home-featured-scroll">
                     ${featured.map(herb => `
-                        <div class="home-featured-card liquid-glass" data-id="${herb.id}">
+                        <div class="home-featured-card glass-lite" data-id="${herb.id}">
                             ${herb.image_url ? `<img src="${this.escapeHtml(herb.image_url)}" loading="lazy" onerror="this.style.display='none'">` : '<div class="home-featured-fallback"><i class="fas fa-leaf"></i></div>'}
                             <div class="home-featured-name">${this.escapeHtml(herb.name)}</div>
                         </div>
